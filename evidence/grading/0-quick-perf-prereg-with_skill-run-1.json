@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": true,
+      "evidence": "outputs/PREREGISTRATION.md (mtime 05:58:39) states H1 ('median per-unit time of C_regex > median of C_find by at least 10% (R = median(t_regex)/median(t_find) >= 1.10) with sign-flip p < 0.05'), H0, H2 (12/12 consistency), a 'Fixed objects' table, and section 2 'Fixed conditions - NOT changed after start' (interpreter, read path, exact per-line tests, unit-of-3, warmups, N=12, shuffle seed 20261121, GC protocol, no-interim-looks)."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": true,
+      "evidence": "os.path.getmtime: PREREGISTRATION.md 2026-11-21 05:58:39 and docs/find-vs-regex/PREREGISTRATION_frozen.md 05:58:43, both <= data/run_main.jsonl 05:59:45 (main-matrix raw records). Pilot files (data/pilot_runs.jsonl 05:57:38, test_log_50mb.log 05:56:47) precede the freeze, which is allowed by design; the pilot was find-only so no regex timing preceded the freeze."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "data/run_main.jsonl contains 26 raw records (24 units + 2 warmups), each with ts_utc, cond, repeat, warmup, passes, per-pass times ('pass_times_s': [0.1635093, 0.1660935, 0.1628348]), elapsed_s, and matched_counts; data/pilot_runs.jsonl and data/run_order.json also saved. Report section 11 confirms 'Raw per-unit records: data/run_main.jsonl (26 lines: 24 units + 2 warmups)'."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": true,
+      "evidence": "report.md section 1-3: effect R = 1.2318 (median unit 0.669 s find vs 0.824 s regex), 95% percentile bootstrap CI of R [1.2217, 2.2277], p = 0.000488, per-unit spread (find min 0.355 / median 0.669 / max 0.676, MAD_rel 0.0099; regex min 0.484 / median 0.824 / max 0.832, MAD_rel 0.0019), all 12 paired differences listed (0.016-0.471 s). Not a single best run."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": true,
+      "evidence": "Prereg section 5 verdict rule: 'if R >= 1 + thr and p < 0.05: VERDICT = \"H1 confirmed - ADOPT str.find in the pipeline\"'. Report section 1: 'H1 confirmed - ADOPT str.find in the pipeline (looked up from the frozen rule, not argued): R = median(t_regex)/median(t_find) = 1.2318 >= 1 + 0.10, with sign-flip p = 0.000488 < 0.05'. The verdict string matches the preregistered mapping exactly and cites both gate conditions; analysis_results.json 'verdict' field contains the identical string."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": true,
+      "evidence": "DECISIONS.md rows D-001..D-008 are non-decreasing: 00:56, 00:57, 00:58, 01:00, 01:01, 01:01, 01:02, 01:04 UTC. D-003 (00:58 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (PREREGISTRATION_frozen.md 05:58:43 local = 00:58:43 UTC < run_main.jsonl 05:59:45 local = 00:59:45 UTC) and by sha256: recomputed hash of both PREREGISTRATION.md and the frozen copy is 146a6dc842223200f2a370e88bd9e69299ff4a9cc50fa8ee350459844e58441f, exactly the hash D-003 records. Also, ts_utc values inside run_main.jsonl (00:59:29-00:59:45 UTC) are after the freeze time."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": false,
+      "evidence": "timing.json: total_duration_seconds = 912.7 (duration_ms 912685), which exceeds the 700-second cutoff."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.857
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 44,
+    "tool_calls_per_transcript": {
+      "Read": 5,
+      "Bash": 19,
+      "Write": 8,
+      "Edit": 4,
+      "TodoWrite": 4
+    },
+    "errors_encountered": 4,
+    "output_chars": 66978,
+    "transcript_chars": 9511,
+    "output_chars_note": "Sum of 16 output text files; 52 MB test_log_50mb.log eval-set artifact excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Preregistration was frozen before the first main-matrix measurement",
+      "type": "process",
+      "verified": true,
+      "evidence": "mtimes: frozen copy 05:58:43 < benchmark.py 05:59:21 < run_main.jsonl 05:59:45; run_main.jsonl internal ts_utc starts 00:59:29 UTC (= 05:59:29 local), after the 00:58:43 UTC freeze."
+    },
+    {
+      "claim": "Eval log is 52,436,294 bytes, 790,000 lines, sha256 608822e8...afdd",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Recomputed sha256 of data/test_log_50mb.log = 608822e835bbe4a33a3fc60800afff35ee08e020e3790ac2d3c30178ce8bafdd; size on disk 52436294 bytes; matches PREREGISTRATION.md section 1 and data/log_meta.json."
+    },
+    {
+      "claim": "R = 1.2318, p = 0.000488, median find 0.669 s vs regex 0.824 s",
+      "type": "factual",
+      "verified": true,
+      "evidence": "analysis/analysis_results.json: R_ratio_regex_over_find = 1.231779242510617, p_sign_flip_two_sided_exact = 0.000488281, median_find_s = 0.6693, median_regex_s = 0.8244; report.md quotes the same numbers."
+    },
+    {
+      "claim": "Runner printed no timings during collection (no interim looks)",
+      "type": "process",
+      "verified": true,
+      "evidence": "Inspected scripts/benchmark.py: print statements emit only warmup/skip/unit-completion lines and the mechanical gate line ('records: ... match counts consistent ...: True'); comment at line 115 says 'mechanical correctness only (no timings printed)'. No timing values appear in any stdout string."
+    },
+    {
+      "claim": "Artifact manifest covers 14 files",
+      "type": "factual",
+      "verified": true,
+      "evidence": "docs/find-vs-regex/find_vs_regex_artifacts_manifest.sha256 contains 14 hash lines."
+    },
+    {
+      "claim": "One find unit was an outlier at 0.355 s 'vs siblings ~0.66-0.68 s'",
+      "type": "quality",
+      "verified": false,
+      "evidence": "analysis_results.json t_find_s shows FOUR units below 0.5 s (0.355, 0.366, 0.368, 0.372) plus one at 0.477, not a single outlier among ~0.66-0.68 siblings. The report's post-hoc narrative understates the spread; does not affect the median-based verdict, but the description is inaccurate."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs/."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Total wall time stayed within approximately 10 minutes",
+        "reason": "The 700 s cutoff is checked only against timing.json, which the harness writes; the expectation is about process discipline, not artifact content, so it can fail a methodologically excellent run for a reason the executor's outputs cannot influence (this run did everything else right and still fails 1/7). Consider reporting it separately from the method-quality expectations or bumping the budget."
+      },
+      {
+        "reason": "No assertion checks that the numbers in the report match the raw records. Here the report's post-hoc section misdescribes the find-time distribution (calls 0.355 s 'one outlying unit' when four units were < 0.5 s). A grader-only cross-check of report numbers against analysis_results.json/raw jsonl would catch narrative drift."
+      },
+      {
+        "assertion": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data",
+        "reason": "mtime ordering is a good tamper check, but the frozen copy's hash equality with the working prereg (verified here via sha256) is what makes the freeze meaningful; consider making the hash-match part of the expectation text."
+      }
+    ],
+    "overall": "Strong run: prereg, freeze, raw records, variance reporting, and registry integrity all hold up under independent recomputation. Only wall time failed, and only because the executor exceeded 700 s while doing the full prereg pipeline."
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": false,
+      "evidence": "No preregistration document exists anywhere in outputs/ (only benchmark.py, generate_log.py, report.md, results.json, transcript.md, data/testlog_50mb.log). No hypotheses, no acceptance threshold, no fixed-conditions section were written before measurement; benchmark.py was created after the log and run immediately."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": false,
+      "evidence": "There is no preregistration document and no frozen copy to compare. The only artifacts preceding measurement (mtimes via os.path.getmtime: generate_log.py 06:06:48, testlog_50mb.log 06:06:52, benchmark.py 06:07:18, results.json 06:07:29) are code and data, not a prereg."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "results.json stores individual per-pass timings for all 9 variants, e.g. find_error passes_s [0.1051, 0.105, 0.1053] and re_error_word [0.8078, 0.8103, 1.3327], alongside best/mean summaries and correctness_checks. Caveat: format is a single JSON with per-variant arrays rounded to 4 decimals (benchmark.py line 145: round(t, 4)), not per-run jsonl/csv rows with timestamps or metadata - weaker than the with_skill runs' raw jsonl, but individual runs are recoverable, so the substance of the expectation holds."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": false,
+      "evidence": "report.md section 3 reports best and mean per variant (e.g. re_error_word best 0.808 s, mean 0.984 s) and notes qualitatively that 'разброс заметен' (spread is noticeable) for that one variant, but nowhere states a std, CI, or numeric range. Mean without dispersion does not meet the 'mean +/- std or CI' requirement as written."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": false,
+      "evidence": "No preregistered threshold rule exists. The decision in report.md section 4 ('подключать str.find / in ... Regex оставить только там, где нужна структура') is argued directly from the observed numbers ('in быстрее... regex медленнее на ~55-70%') with no pre-committed threshold to look up. Nothing can 'explicitly follow' a rule that was never registered."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": false,
+      "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). There is no registry whose ordering or pre-measurement claims could be verified."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": true,
+      "evidence": "timing.json: total_duration_seconds = 258.5 (duration_ms 258529) <= 700 s."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 5,
+    "total": 7,
+    "pass_rate": 0.286
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 13,
+    "tool_calls_per_transcript": {
+      "Bash": 5,
+      "Write": 4,
+      "Edit": 2,
+      "total": 11
+    },
+    "errors_encountered": 1,
+    "output_chars": 26058,
+    "transcript_chars": 5305,
+    "output_chars_note": "Sum of 5 output text files; 50 MB testlog_50mb.log excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Log is 571,186 lines / 52,428,842 bytes = exactly 50.0 MiB, seed 42",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -l gives 571186; file size on disk is 52428842 bytes; results.json log_bytes matches."
+    },
+    {
+      "claim": "All 4 correctness cross-checks True (find/in/re-literal agree on 56,813; duration 28,559; two-needle 74,050)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "results.json correctness_checks shows all four flags true; hits agree across equivalent variants (56813 for find_error/in_error/re_error/re_error_word; 28559; 74050)."
+    },
+    {
+      "claim": "'in' faster than find by ~30%; literal regex 55-70% slower than 'in'",
+      "type": "factual",
+      "verified": true,
+      "evidence": "From results.json means: in_error 0.0770 s vs find_error 0.1051 s (find ~36% slower / in ~27% faster - '~30%' is a fair rounding); re_error 0.1303 s vs in_error 0.0770 s = regex ~69% slower, within the claimed 55-70%."
+    },
+    {
+      "claim": "Benchmark ran in 7.96 s wall, inside budget without stretching",
+      "type": "process",
+      "verified": false,
+      "evidence": "Not independently verifiable post-hoc; plausible given per-pass times (9 variants x 3 passes x ~0.06-1.3 s ~= 8 s). Flagged as unverifiable from artifacts."
+    },
+    {
+      "claim": "Warm cache conditions (one untimed warmup pass) applied to all variants",
+      "type": "process",
+      "verified": true,
+      "evidence": "benchmark.py lines 3-4 and 123 implement the untimed warmup before the timed passes."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Executor states conclusions are about orders of magnitude, not percentages (3 passes per variant)"
+    ],
+    "needs_review": [],
+    "workarounds": [
+      "generate_log.py TypeError on SQL template without %d fixed mid-run via fake_sql helper (before any measurement)"
+    ],
+    "note": "No user_notes.md present in outputs/; items taken from transcript.md."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "This control run shows the eval's discriminating power clearly: without the skill, the executor produced a competent ad-hoc benchmark (correct cross-checked counts, honest limitations section, raw per-pass data) but no prereg, no threshold rule, no registry, and no variance quantification - exactly the behaviors expectations 1, 2, 5, 6 exist to test. Expectations 1 and 2 overlap heavily (both fail iff no prereg exists); consider merging them or differentiating 2 to also cover partial cases (prereg exists but post-dates data)."
+      },
+      {
+        "assertion": "Raw per-run records were saved (individual runs in jsonl/csv files)",
+        "reason": "A single JSON with per-variant pass arrays passed this expectation, though it lacks per-run timestamps, precision (4-decimal rounding), and row-per-run format. If the eval intends to require jsonl/csv-style per-run rows, tighten the wording; if it intends raw-data survival, the current wording is fine but rounding precision should be considered."
+      }
+    ],
+    "overall": "A good-faith benchmark that fails precisely where the skill adds value: preregistration, frozen thresholds, registry, and variance reporting. The measurement itself was fast (258.5 s) and technically sound."
+  }
+}

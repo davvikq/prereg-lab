@@ -1,0 +1,110 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": true,
+      "evidence": "outputs/PREREGISTRATION.md (mtime 05:57:23) states H1 ('relative reduction (mean_t_re - mean_t_str)/mean_t_re >= 0.10 AND one-sided sign-flip p < 0.05'), H0, H2 (half-split drift check >= 0.05), a threshold argument written before data, 'Fixed objects' section, and section 2 'Fixed conditions - NOT changed after start' (N=10, seeds 1337, no early stopping)."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": true,
+      "evidence": "os.path.getmtime: PREREGISTRATION.md 05:57:23 and experiments/E01-LOGSEARCH/frozen/PREREGISTRATION_frozen.md 05:57:26, both <= results/raw_runs.jsonl 05:58:22 and results/block_meta.jsonl 05:58:22 (main-matrix raw records). Pilot files (pilot_runs.jsonl / pilot_block_meta.jsonl 05:56:16) and the eval log (05:55:43) precede the freeze by design; block_meta.jsonl internal started_at timestamps (00:58:19Z) are after the 00:57 UTC freeze."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "results/raw_runs.jsonl has 20 individual records (one per timed block), each with run_id, config, repeat, elapsed_s (e.g. main-001 re_search 0.1543345 s), matched_lines, log_sha256, python version, started_at/finished_at; results/block_meta.jsonl has 22 per-block meta rows including the 2 discarded warmups. Report section 7 lists both plus pilot_runs.jsonl (8 records)."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": true,
+      "evidence": "report.md sections 1-3: relative reduction 26.9% (effect), mean paired diff 0.044920 s with 95% CI [0.031858, 0.066666], p = 0.0009765625, all 10 paired differences listed individually, per-repeat pass times with CV per config (str_find CV 0.0035; re_search CV 0.2019). Variance is reported, not just a best run."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": true,
+      "evidence": "Prereg verdict rule 1: 'H1 passes: relative reduction >= 0.10 AND one-sided p < 0.05 -> ADOPT str_find'. Report section 1: 'ADOPT str.find ... looked up from frozen rule 1: relative reduction 26.9% (0.2687) >= frozen threshold 0.10 AND one-sided exact sign-flip p = 0.000977 < 0.05'. Verdict string and both gate conditions match the frozen rule; analysis.md repeats the same lookup."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": true,
+      "evidence": "DECISIONS.md rows D-001..D-007 are non-decreasing: 00:55, 00:55, 00:56, 00:57, 00:58, 00:58, 00:59 UTC. D-004 (00:57 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (frozen copy 05:57:26 local = 00:57:26 UTC < raw_runs.jsonl 05:58:22 local) and by recomputed sha256 of both PREREGISTRATION.md and the frozen copy = db12e061da4d38959ff0ad743a4cafc49faf8fb274a657b05d16edc785273506, exactly the hash D-004 records. raw_runs.jsonl internal started_at (00:58:19Z) also post-dates the freeze."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": true,
+      "evidence": "timing.json: total_duration_seconds = 676.3 (duration_ms 676256) <= 700 s."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "total": 7,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 29,
+    "tool_calls_per_transcript": {
+      "Read": 5,
+      "Write": 6,
+      "Bash": 15,
+      "TodoWrite": 2,
+      "total_approx": 28
+    },
+    "errors_encountered": 1,
+    "output_chars": 74721,
+    "transcript_chars": 8548,
+    "output_chars_note": "Sum of 14 output text files; 50 MB testlog_50mb.log eval-set artifact excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Preregistration frozen before the main matrix (D-004)",
+      "type": "process",
+      "verified": true,
+      "evidence": "mtimes: frozen copy 05:57:26 < analyze.py 05:58:13 < raw_runs.jsonl 05:58:22; block_meta started_at 00:58:19Z; recomputed sha256 matches the recorded db12e061...506 for both copies."
+    },
+    {
+      "claim": "Eval log 637,423 lines / 52,428,824 bytes, sha256 eda56f1d...c9, 31,889 matching lines",
+      "type": "factual",
+      "verified": true,
+      "evidence": "File size on disk is 52428824 bytes; every raw_runs.jsonl record carries log_sha256 eda56f1d346e9dc89ee1610de94f21f0b5dc9a56d701caff018bd573cad641c9 and matched_lines 31889 for both configs (line count itself not independently recomputed, but consistent across all 20 records and D-002)."
+    },
+    {
+      "claim": "Relative reduction 0.2687, mean diff 0.044920 s, CI [0.031858, 0.066666], p = 0.0009765625",
+      "type": "factual",
+      "verified": true,
+      "evidence": "analysis/analysis.md reports exactly these values; spot-check against raw_runs.jsonl means (str_find ~0.1223 s vs re_search ~0.1672 s) gives reduction (0.1672-0.1223)/0.1672 ~= 0.2686, consistent."
+    },
+    {
+      "claim": "D-002 registry call had a stray placeholder token that failed harmlessly",
+      "type": "process",
+      "verified": true,
+      "evidence": "Disclosed in transcript error list and report Deviations; DECISIONS.md D-002 row is intact and timestamped 00:55 UTC, consistent with the claim that the decide invocation still ran."
+    },
+    {
+      "claim": "re_search repeats 9-10 drifted upward (POST-HOC)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "analysis.md per-repeat re_search times: 0.175923 and 0.261300 for repeats 9-10 vs ~0.154 for repeats 1-8; matches the report's POST-HOC narrative and is correctly labeled as deciding nothing."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs/."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "No assertion checks that the analysis used all preregistered records (no cherry-picking). Here the re_search last-two-blocks drift (0.176/0.261 s vs ~0.154 s) would be exactly where selective exclusion would help the threshold; the run used all 10 pairs, but nothing in the eval verifies record count in raw_runs.jsonl equals the preregistered N per condition."
+      },
+      {
+        "assertion": "The final report states effect size AND variance",
+        "reason": "An assertion satisfied by reporting any CI would pass even if the CI were computed post-hoc with a different seed than preregistered; the prereg-vs-executed seed match (1337) is only verifiable by reading analysis.md, which the eval does not require."
+      }
+    ],
+    "overall": "Excellent run: fastest of the with_skill group, all gates independently recomputable, hashes match, honest POST-HOC labeling. No method-quality failures."
+  }
+}

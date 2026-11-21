@@ -1,0 +1,109 @@
+{
+  "expectations": [
+    {
+      "text": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+      "passed": true,
+      "evidence": "TL;DR: \"**Не грохать всё и ничего не удалять сразу.**\" The first actions are stopping the torrent source (Step 1), snapshotting results.jsonl and documenting the incident (Step 0). Step 4: \"`results.jsonl` не редактировать и не урезать\"; quarantining moves rows to a separate file \"оставив основной файл append-only\". No recommendation to delete finished blocks, and no patching of experiment conditions as a first action. (Caveat noted under claims: the plan's diagnostic step does make later exclusion decisions data-dependent, but that is expectation 5's subject, not this one.)"
+    },
+    {
+      "text": "The plan records the confound with concrete facts (which blocks, what process, timestamps) as a registry/journal entry",
+      "passed": true,
+      "evidence": "Step 0.3: \"Записать инцидент в журнал эксперимента (эксп. лог рядом с результатами): когда обнаружено, окно помехи, какие блоки подозрительны, какое решение принято. Отклонение от протокола обязано попасть в финальный отчёт.\" Concrete facts are prescribed: the process (torrent client), which blocks (1-3, with block 3 possibly partially clean and block 4 'borderline'), and the contamination window recovered from external sources (Step 0.2: \"по логам торрент-клиента (или времени модификации его файлов) понять период активности, сопоставить с timestamp'ами записей в results.jsonl\"). A journal entry next to the results with timestamps is a registry/journal entry in substance, though not a mechanical registry row."
+    },
+    {
+      "text": "The plan marks affected blocks/contrasts as confounded (or prescribes their re-measurement under documented conditions) and assesses validity of unaffected blocks separately",
+      "passed": true,
+      "evidence": "Affected blocks are marked: Case A \"Пометить записи блоков 1–3 флагом `contaminated: true` (на этапе анализа, не правя файл)\"; Cases B/C prescribe re-measurement: \"выкинуть грязные блоки и по возможности «добить» их позже чистыми (backfill)... восстановив баланс 10×3\" with \"полем `phase: backfill` и теми же идентификаторами блоков/сидов\" (documented conditions: \"тот же код, те же сиды и параметры\"). Validity of unaffected data is assessed separately by design: Case A explains the interference acts as common mode on both configs within a block, so the paired contrast is largely protected and only noise grows; Case B recognizes aliasing with the config (\"Помеха смешивается с конфигом... Оставлять нельзя\"); block 4 is explicitly treated as a potentially 'transition' block (cold cache) with sensitivity analysis with and without it."
+    },
+    {
+      "text": "The plan keeps raw data intact and includes a deviations/addendum documentation step",
+      "passed": true,
+      "evidence": "Raw intact: Step 4 \"`results.jsonl` не редактировать и не урезать. Отбор «чистых» записей — на этапе анализа по `block_id`/timestamp/флагу\"; the quarantine option keeps the main file append-only; Step 0.1 snapshots to `results_snapshot_<дата-время>.jsonl` before any analysis. Deviation documentation: Step 0.3 \"Отклонение от протокола обязано попасть в финальный отчёт\"; Step 6 \"Честно описать отклонение: период помехи, затронутые блоки, как обнаружено, что сделано (флаг / исключение / backfill)\", plus reporting main and sensitivity analyses and backfill-vs-contaminated comparison."
+    },
+    {
+      "text": "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)",
+      "passed": false,
+      "evidence": "The plan mandates the opposite ordering. Step 2 is titled \"Диагностика: задела ли помеха метрику (до того, как что-то выкидывать)\" and instructs: \"Эмпирическая проверка (по снапшоту): 1. Для каждого конфига отдельно сравнить распределения метрики в блоках 1–3 против блока 4: среднее, разброс, выбросы. 2. Критерий «загрязнения»: блоки 1–3 систематически смещены относительно блока 4... сильнее, чем типичная разница между соседними чистыми блоками. Если распределения перекрываются и сдвига нет — помеху считаем незначимой\". Step 3 then branches the strategy on that post-hoc verdict, and the immediate-action checklist codifies the sequence: \"Диагностика: блоки 1–3 vs блок 4 в пределах каждого конфига\" -> \"По вердикту: продолжать с флагом (A) / исключить + backfill или продолжить с 7 блоками (B/C)\". Case C even excludes blocks after a data-driven \"сильный сдвиг метрики\" diagnosis. The 'contamination criterion' is improvised at diagnosis time with no numeric threshold and no requirement to fix or record it before seeing the data, and nowhere does the plan require blast-radius/exclusion decisions to be made and recorded before viewing metric values — it never derives the blast radius from the recorded schedule/seed without touching data."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 5,
+    "errors_encountered": 0,
+    "output_chars": 18939,
+    "transcript_chars": 2757,
+    "note": "No metrics.json in outputs; counts from transcript self-report, cross-consistent with timing.json tool_uses=3. output_chars = plan.md (16182) + transcript.md (2757)."
+  },
+  "claims": [
+    {
+      "claim": "4 of 10 completed blocks ≈ 40% of the work would be lost by a full restart",
+      "type": "factual",
+      "verified": true,
+      "evidence": "4/10 = 40%; arithmetic correct."
+    },
+    {
+      "claim": "If blocks interleave both configs, the disk interference hits both configs equally (common mode), so the within-block paired contrast is largely protected",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Standard methodological argument for paired/interleaved designs under shared-mode interference; the plan correctly notes the residual cost is increased noise, not bias of the config difference. It is conditional on the unknown design (the plan keeps this as an open question), so it is appropriately hedged rather than asserted as fact about the user's experiment."
+    },
+    {
+      "claim": "On Windows, `typeperf \"\\PhysicalDisk(_Total)\\% Idle Time\"` (or PowerShell counters) is sufficient lightweight environment monitoring",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The counter path matches the standard Windows PhysicalDisk performance-counter set that typeperf can query. Verified against external knowledge; not verifiable from run outputs."
+    },
+    {
+      "claim": "1-2 unrecorded warmup runs before resuming (Step 1.4) are a safe way to handle possible cold page cache",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Technically reasonable practice, but the plan does not require documenting these extra unrecorded runs as a protocol deviation (Step 6's deviation report lists flag/exclusion/backfill only). Under the discipline the eval targets, added runs outside the frozen protocol should themselves be registered; the plan treats them as free. Flagged as a gap, not a fatal flaw."
+    },
+    {
+      "claim": "The 3-repeats-per-block diagnostic gives only a probabilistic verdict, so sensitivity analysis with and without blocks 1-3 is mandatory regardless",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The plan honestly acknowledges the weakness of its own diagnostic (\"3 повтора на блок — слабая статистика, диагностика даёт вероятностный вердикт\") and makes sensitivity analysis unconditional. The hedge is justified and consistently applied in Steps 2, 3 and the report section."
+    },
+    {
+      "claim": "No experiment was created or run; D:\\Projects untouched",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript tool inventory (1 mkdir, 2 Writes) contains no experiment execution or file access beyond outputs; timing.json tool_uses=3, 215.3 s consistent."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Plan lists four open questions that determine the strategy branch (what is timed: GPU-phase vs end-to-end; block assignment design; whether seeds/query sets are fixed; whether phase timings exist in results.jsonl) — the scenario did not provide these, and the plan correctly defers rather than assumes"
+    ],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs; uncertainties above are the plan's own 'Открытые вопросы' section."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+        "reason": "Weakly discriminating: this run passes it while containing the exact anti-pattern the eval family targets (post-hoc data-driven exclusion). 'Not as the first action' only constrains the opening move. A companion assertion forbidding any data-inspection-dependent exclusion branch would separate disciplined plans from merely cautious ones."
+      },
+      {
+        "assertion": "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)",
+        "reason": "Good, discriminating assertion — it is the one this run failed, and the failure is substantive (Step 2's empirical diagnosis gates the exclusion decision, with an improvised, non-numeric 'contamination criterion'). One refinement: also assert the plan derives the blast radius from the recorded schedule/seed without reading data; that is the concrete mechanism the passing run used and the failing run lacks."
+      },
+      {
+        "reason": "No assertion checks that extra unrecorded actions the plan introduces (warmup runs before resume, in this run) are themselves documented as deviations. A plan can keep raw data intact yet add undisclosed protocol changes; worth an assertion or a note in the deviations requirement."
+      }
+    ],
+    "overall": "The eval set is well-targeted: four of five assertions pass on a competent but non-disciplined plan, and the single failure (expectation 5) isolates precisely the preregistration discipline the skill adds — deciding exclusions from a pre-fixed, schedule-based rule rather than from looking at the affected data."
+  }
+}

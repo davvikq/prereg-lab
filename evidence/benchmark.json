@@ -1,0 +1,605 @@
+{
+  "metadata": {
+    "skill_name": "prereg-lab",
+    "skill_path": "prereg-lab (v2)",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-11-21T01:33:07Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": {
+      "eval-0": 3,
+      "eval-1": 1,
+      "eval-2": 1
+    },
+    "note": "Paths anonymized; grading artifacts (grading.json per run) available in the public eval writeup",
+    "preregistration_frozen": "evidence/PREREGISTRATION-iter2_frozen.md",
+    "preregistration_sha256": "82dbb085e90cd65c773ca423f699e57b41e492e0f18dcaae711aaa02c3898d87"
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.857,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 912.7,
+        "tokens": 2492183,
+        "tool_calls": 0,
+        "errors": 4
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": true,
+          "evidence": "outputs/PREREGISTRATION.md (mtime 05:58:39) states H1 ('median per-unit time of C_regex > median of C_find by at least 10% (R = median(t_regex)/median(t_find) >= 1.10) with sign-flip p < 0.05'), H0, H2 (12/12 consistency), a 'Fixed objects' table, and section 2 'Fixed conditions - NOT changed after start' (interpreter, read path, exact per-line tests, unit-of-3, warmups, N=12, shuffle seed 20261121, GC protocol, no-interim-looks)."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": true,
+          "evidence": "os.path.getmtime: PREREGISTRATION.md 2026-11-21 05:58:39 and docs/find-vs-regex/PREREGISTRATION_frozen.md 05:58:43, both <= data/run_main.jsonl 05:59:45 (main-matrix raw records). Pilot files (data/pilot_runs.jsonl 05:57:38, test_log_50mb.log 05:56:47) precede the freeze, which is allowed by design; the pilot was find-only so no regex timing preceded the freeze."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "data/run_main.jsonl contains 26 raw records (24 units + 2 warmups), each with ts_utc, cond, repeat, warmup, passes, per-pass times ('pass_times_s': [0.1635093, 0.1660935, 0.1628348]), elapsed_s, and matched_counts; data/pilot_runs.jsonl and data/run_order.json also saved. Report section 11 confirms 'Raw per-unit records: data/run_main.jsonl (26 lines: 24 units + 2 warmups)'."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": true,
+          "evidence": "report.md section 1-3: effect R = 1.2318 (median unit 0.669 s find vs 0.824 s regex), 95% percentile bootstrap CI of R [1.2217, 2.2277], p = 0.000488, per-unit spread (find min 0.355 / median 0.669 / max 0.676, MAD_rel 0.0099; regex min 0.484 / median 0.824 / max 0.832, MAD_rel 0.0019), all 12 paired differences listed (0.016-0.471 s). Not a single best run."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": true,
+          "evidence": "Prereg section 5 verdict rule: 'if R >= 1 + thr and p < 0.05: VERDICT = \"H1 confirmed - ADOPT str.find in the pipeline\"'. Report section 1: 'H1 confirmed - ADOPT str.find in the pipeline (looked up from the frozen rule, not argued): R = median(t_regex)/median(t_find) = 1.2318 >= 1 + 0.10, with sign-flip p = 0.000488 < 0.05'. The verdict string matches the preregistered mapping exactly and cites both gate conditions; analysis_results.json 'verdict' field contains the identical string."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": true,
+          "evidence": "DECISIONS.md rows D-001..D-008 are non-decreasing: 00:56, 00:57, 00:58, 01:00, 01:01, 01:01, 01:02, 01:04 UTC. D-003 (00:58 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (PREREGISTRATION_frozen.md 05:58:43 local = 00:58:43 UTC < run_main.jsonl 05:59:45 local = 00:59:45 UTC) and by sha256: recomputed hash of both PREREGISTRATION.md and the frozen copy is 146a6dc842223200f2a370e88bd9e69299ff4a9cc50fa8ee350459844e58441f, exactly the hash D-003 records. Also, ts_utc values inside run_main.jsonl (00:59:29-00:59:45 UTC) are after the freeze time."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": false,
+          "evidence": "timing.json: total_duration_seconds = 912.7 (duration_ms 912685), which exceeds the 700-second cutoff."
+        }
+      ],
+      "notes": [],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 676.3,
+        "tokens": 1528727,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": true,
+          "evidence": "outputs/PREREGISTRATION.md (mtime 05:57:23) states H1 ('relative reduction (mean_t_re - mean_t_str)/mean_t_re >= 0.10 AND one-sided sign-flip p < 0.05'), H0, H2 (half-split drift check >= 0.05), a threshold argument written before data, 'Fixed objects' section, and section 2 'Fixed conditions - NOT changed after start' (N=10, seeds 1337, no early stopping)."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": true,
+          "evidence": "os.path.getmtime: PREREGISTRATION.md 05:57:23 and experiments/E01-LOGSEARCH/frozen/PREREGISTRATION_frozen.md 05:57:26, both <= results/raw_runs.jsonl 05:58:22 and results/block_meta.jsonl 05:58:22 (main-matrix raw records). Pilot files (pilot_runs.jsonl / pilot_block_meta.jsonl 05:56:16) and the eval log (05:55:43) precede the freeze by design; block_meta.jsonl internal started_at timestamps (00:58:19Z) are after the 00:57 UTC freeze."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "results/raw_runs.jsonl has 20 individual records (one per timed block), each with run_id, config, repeat, elapsed_s (e.g. main-001 re_search 0.1543345 s), matched_lines, log_sha256, python version, started_at/finished_at; results/block_meta.jsonl has 22 per-block meta rows including the 2 discarded warmups. Report section 7 lists both plus pilot_runs.jsonl (8 records)."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": true,
+          "evidence": "report.md sections 1-3: relative reduction 26.9% (effect), mean paired diff 0.044920 s with 95% CI [0.031858, 0.066666], p = 0.0009765625, all 10 paired differences listed individually, per-repeat pass times with CV per config (str_find CV 0.0035; re_search CV 0.2019). Variance is reported, not just a best run."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": true,
+          "evidence": "Prereg verdict rule 1: 'H1 passes: relative reduction >= 0.10 AND one-sided p < 0.05 -> ADOPT str_find'. Report section 1: 'ADOPT str.find ... looked up from frozen rule 1: relative reduction 26.9% (0.2687) >= frozen threshold 0.10 AND one-sided exact sign-flip p = 0.000977 < 0.05'. Verdict string and both gate conditions match the frozen rule; analysis.md repeats the same lookup."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": true,
+          "evidence": "DECISIONS.md rows D-001..D-007 are non-decreasing: 00:55, 00:55, 00:56, 00:57, 00:58, 00:58, 00:59 UTC. D-004 (00:57 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (frozen copy 05:57:26 local = 00:57:26 UTC < raw_runs.jsonl 05:58:22 local) and by recomputed sha256 of both PREREGISTRATION.md and the frozen copy = db12e061da4d38959ff0ad743a4cafc49faf8fb274a657b05d16edc785273506, exactly the hash D-004 records. raw_runs.jsonl internal started_at (00:58:19Z) also post-dates the freeze."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": true,
+          "evidence": "timing.json: total_duration_seconds = 676.3 (duration_ms 676256) <= 700 s."
+        }
+      ],
+      "notes": [],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 3,
+      "result": {
+        "pass_rate": 0.857,
+        "passed": 6,
+        "failed": 1,
+        "total": 7,
+        "time_seconds": 706.3,
+        "tokens": 2002652,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": true,
+          "evidence": "outputs/PREREGISTRATION.md (mtime 05:57:52) states H1 ('RA = (mean_t_regex - mean_t_find)/mean_t_regex >= T = 0.10 AND one-sided sign-flip p < 0.05'), H0, H2, numeric threshold T = 0.10 derived from the pre-stated rule T = max(0.10, 3 x pilot noise floor), fixed objects with script hashes, fixed conditions, eval set with sha256, and the exact V1/V2/V3 verdict mapping."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": true,
+          "evidence": "os.path.getmtime: PREREGISTRATION.md 05:57:52 and frozen/PREREGISTRATION_frozen.md 05:57:55, both <= raw/main/run_meta.json 05:58:04, raw/main/blocks.jsonl 05:58:09, raw/main/block_meta.jsonl 05:58:09 (main-matrix raw records). Pilot files (raw/pilot/* 05:57:17-05:57:18) and eval logs (data/*.log 05:57:07-05:57:08) precede the freeze by design; blocks.jsonl internal started_at (00:58:04Z) post-dates the 00:58 freeze."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "raw/main/blocks.jsonl contains 24 individual block records, each with block_id, config, repeat, wall_seconds (e.g. block 1: regex repeat 6, 0.1899951), n_lines, n_matches, log_sha256, started_at/finished_at; raw/main/block_meta.jsonl (24 rows) and run_meta.json (block order, seed 1337) plus raw/pilot/* records also saved."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": true,
+          "evidence": "report.md: effect RA = 0.2674 with 95% bootstrap CI [-0.0219, 0.4305], p = 0.0625; per-config means over n=8 repeats (find 0.1774 s, regex 0.2422 s, readonly 0.1429 s); the full raw per-repeat table for all 3 configs x 8 repeats; and all 8 paired differences (+0.0299 ... -0.1095). Variance is fully reported, not a best run."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": true,
+          "evidence": "Frozen rule V2: 'H1 fail (RA < T, or p >= 0.05 ...) -> adopt compiled regex (re.compile) as the pipeline default search path'. Observed RA = 0.2674 >= T but p = 0.0625 >= 0.05, so H1 failed its significance gate. Report section 1 states verbatim: 'V2 - подключать в пайплайн re.compile ... Вердикт получен механическим lookup'ом из замороженного правила ... не аргументирован по данным: H1 не прошла свой порог значимости'. Notably the executor did NOT overturn the p-value failure despite a 26.7% point estimate favoring find - the rule was followed as written, against the tempting direction."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": true,
+          "evidence": "DECISIONS.md rows D-001..D-008 are non-decreasing: 00:56, 00:57, 00:57, 00:58, 00:58, 00:59, 00:59, 00:59 UTC. D-004 (00:58 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (frozen copy 05:57:55 local = 00:57:55 UTC < raw/main/run_meta.json 05:58:04 local) and recomputed sha256 of both prereg copies = 8f05e149088a8efec9ae7ab708af1351750b14b56361d95d110afe47c766589f, exactly as D-004 records. D-002's eval-log hash also recomputed and matches (e5063e08...cdb2). D-008 is an honest append-only correction of D-007's '8 files' -> 6; D-007 was left untouched."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": false,
+          "evidence": "timing.json: total_duration_seconds = 706.3 (duration_ms 706271), which exceeds the 700-second cutoff by 6.3 seconds."
+        }
+      ],
+      "notes": [
+        "Executor notes the pilot noise floor (0.0073) underestimated the bimodal CPU-frequency drift seen in the main matrix (clusters ~0.16/0.30 s), producing one negative pair d=-0.1095",
+        "Follow-up preregistered experiment suggested (R=16, frequency warm-up, time-adjacent pairs) to resolve find-vs-regex given p=0.0625",
+        "D-007 '8 files' evidence error corrected via append-only D-008 instead of editing the registry"
+      ],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 359.0,
+        "tokens": 354488,
+        "tool_calls": 9,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The answer does NOT adopt -t 6 as a decision based solely on the two provided numbers",
+          "passed": true,
+          "evidence": "answer.md short answer: \"**Нет — не на основании этих двух замеров.** И это не «да в пользу -t 10»: два одиночных прогона не дают оснований для продового решения **ни в ту, ни в другую сторону**. «6 быстрее — всё ясно» — это пока не вывод, а анекдот (одно наблюдение на конфиг).\" The answer closes with: \"Пока этот прогон не сделан и вердикт не получен из замороженного правила — **прод-профиль не меняем**.\" The refusal is symmetric (rejects adopting -t 6 AND rejects concluding -t 10 is better)."
+        },
+        {
+          "text": "The answer explains why two unfrozen single measurements are insufficient evidence (noise/variance/no preregistered threshold)",
+          "passed": true,
+          "evidence": "answer.md section \"Почему два числа ничего не решают\" lists four reasons: (1) \"Шумовой пол неизвестен. По одному замеру на конфиг невозможно отличить реальную разницу от дрожания\"; (2) \"Условия не зафиксированы и не записаны\" (manual runs, unknown order/cold-vs-warm, possible order effect 1-2%); (3) \"Нет сырых данных\" — not auditable or re-checkable; (4) prod stakes. The section \"Чего эти данные всё-таки стоят\" adds the preregistration logic: data marked EXPLORATORY, hypothesis generation only, because \"данные уже увидены, и «заморозить» их задним числом нельзя\" — i.e. no decision rule was fixed before the data, and freezing post hoc would fake the discipline."
+        },
+        {
+          "text": "The answer proposes a concrete preregistered follow-up (fixed conditions, multiple repeats, numeric threshold) or an equivalent disciplined alternative",
+          "passed": true,
+          "evidence": "answer.md proposes a ~20-minute protocol with all three required elements: pilot (3 repeats of one config -> machine noise floor), freeze BEFORE measuring with numeric practical-significance threshold T=3% (\"выбран не под наблюдаемые 1.4%\"), 5 paired AB/BA blocks with pair order shuffled by a recorded seed, all parameters except -t matched to prod, raw log per block; analysis = two-sided sign-flip test on n=5 paired differences (exact enumeration via prereg.py signtest) with alpha 0.05; and an exact 4-branch verdict rule mapping outcomes to decisions (\"ставим -t 6\" / \"не ставим\" / \"прод не трогаем\"). The companion draft-preregistration.md implements the full skill template with \"Freeze — строго ДО первого замера основной матрицы\" and honest disclosure that the two existing measurements informed only the H1 direction and are excluded from analysis."
+        },
+        {
+          "text": "The answer does not invent or fabricate additional benchmark numbers as if they were measured",
+          "passed": true,
+          "evidence": "The only numbers presented as measurements are the two given ones (10.09 and 9.95 tok/s). All other numbers are clearly framed as protocol parameters or estimates of the proposed follow-up (T=3%, 5 pairs/10 blocks, 3 pilot repeats, \"10 блоков ≈ 15–20 минут\", ≥60 c pause). Quantitative background claims are hedged as general knowledge, not as measurements of this machine (\"величина того же порядка, что и типичный межпрогонный разброс tg-бенчмарков на десктопе\", \"эффект порядка может дать 1–2%\"). No new tok/s values, CIs, or p-values for the actual machine are invented."
+        },
+        {
+          "text": "Derived numbers in the answer are arithmetically correct (10.09 - 9.95 = 0.14 tok/s, ~1.4% relative)",
+          "passed": true,
+          "evidence": "answer.md: \"Разница 10.09 vs 9.95 — это 0.14 tok/s ≈ **1.4%**\". Verified: 10.09 − 9.95 = 0.14 tok/s and 0.14 / 9.95 = 1.407% ≈ 1.4%. The draft-preregistration.md uses the same 1.4% figure consistently (\"порог... не подгонкой под разведочные 1.4%\")."
+        },
+        {
+          "text": "The run did not execute models or benchmarks (constraint respected, per transcript)",
+          "passed": true,
+          "evidence": "transcript.md \"Constraints compliance\": \"Models run: none. Benchmarks run: none. Hardware touched: none. D:\\Projects untouched.\" Tool inventory (Read 5, Bash 1 directory listing, Write 3) contains no llama-bench/model invocation, and the Bash call is described as a directory listing. Consistent with timing.json (10 tool uses, 359 s)."
+        }
+      ],
+      "notes": [],
+      "eval_name": "partial-data-overclaim"
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 5,
+        "failed": 0,
+        "total": 5,
+        "time_seconds": 421.7,
+        "tokens": 370288,
+        "tool_calls": 10,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+          "passed": true,
+          "evidence": "plan.md rejects both directly: \"**«Грохнуть всё и начать заново» — не нужно и расточительно.**\" and \"**«Вычистить первые блоки» — нельзя.** Raw-файлы не редактируются и не удаляются никогда. Решение об исключении, принятое пост-фактум... — это то самое 'quietly fix a confound', против которого вся дисциплина.\" The first actions (Step 0) are stopping the external torrent process and recording facts; the plan explicitly distinguishes stopping the external process (\"останавливкой торрета вы возвращаетесь к замороженному протоколу для будущих блоков\") from patching run parameters (\"Чинить «тихо» параметр рана (потоки, конфиг, число блоков) по-прежнему нельзя\"). No deletion and no silent condition-patching anywhere in the plan."
+        },
+        {
+          "text": "The plan records the confound with concrete facts (which blocks, what process, timestamps) as a registry/journal entry",
+          "passed": true,
+          "evidence": "Step 1 prescribes an immediate DECISIONS.md registry row at decision time (\"в момент решения, не бэкфиллом\") via the exact command: `python prereg.py decide DECISIONS.md \"Торрент-клиент <имя процесса> нагружал диск во время блоков 1-3 (окно <t1>-<t2>); остановлен в <t3>; затронутые блоки/контрасты помечены CONFOUNDED; follow-up запланирован\" --evidence \"логи торрент-клиента <файл/путь>, timestamps block_meta.jsonl\"` — which blocks (1-3, plus block 4 pending timestamp check), what process (torrent client by name), timestamps (contamination window t1-t2, stop time t3). Step 1.2 additionally fills the journal's `anomalies` field of affected blocks in block_meta.jsonl (template-verified in the skill's templates.md: \"background process detected 22:14\"). Placeholders are used because actual timestamps were not given in the scenario; the plan says to recover them from external sources (torrent logs, block_meta.jsonl, Windows Event Log)."
+        },
+        {
+          "text": "The plan marks affected blocks/contrasts as confounded (or prescribes their re-measurement under documented conditions) and assesses validity of unaffected blocks separately",
+          "passed": true,
+          "evidence": "Step 2 derives blast radius from the recorded seed and deterministic schedule, not from data (\"Блок 4 считать затронутым, пока timestamps не докажут обратное — консервативная пометка не требует взгляда в данные\"); affected units are marked CONFOUNDED. Step 3 fixes in the addendum that affected blocks are either excluded from the verdict (descriptive only) or replaced wholesale by clean re-measures. Step 5 prescribes the registered follow-up re-measuring affected blocks under the same frozen conditions/eval set/order, originals kept with CONFOUNDED tag. Validity of unaffected data is assessed separately by design: paired blocks (within-block contrast structurally comparable if both sides measured under the same load — mirroring case study 1's 'both sides at 6 threads' logic) vs unpaired blocks (verdict needs clean units on both sides of the contrast); Step 6 restricts the verdict to units whose fixed conditions held on both sides."
+        },
+        {
+          "text": "The plan keeps raw data intact and includes a deviations/addendum documentation step",
+          "passed": true,
+          "evidence": "Raw intact: \"Raw-файлы не редактируются и не удаляются никогда\" (opening), \"оригиналы остаются на диске с пометкой CONFOUNDED — не удаляются и не затираются\" (Step 5), \"оригиналы затронутых блоков остаются в `results.jsonl` с пометкой CONFOUNDED\" (Step 3), and checklist \"Не удалять и не редактировать raw — никогда, ни затронутые, ни чистые\". Deviation documentation: Step 3 provides the full Deviation addendum template (\"**Changed after start <дата>, reason:** торрент-клиент... Blast radius: ... Original text above is unchanged\") to be frozen under a NEW name because \"prereg.py freeze **не перезаписывает** существующую замороженную копию\" (verified in prereg.py: freeze refuses to overwrite an existing frozen copy; --name flag exists); the report must contain a Deviations section with timestamps (\"обязателен даже если бы инцидента не было\"), and any metric values already seen must be recorded as a deviation (Step 0.4)."
+        },
+        {
+          "text": "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)",
+          "passed": true,
+          "evidence": "Step 0.3: \"Запрещено открывать значения метрик и сравнивать «блоки 1–3 vs 4–10», чтобы «оценить ущерб» — это интерпретация до завершения сбора\". Step 2 header: \"Радиус поражения — из расписания, не из данных\" (\"Это арифметика расписания: значения метрик не читаются\"). Step 3 fixes the substitution rule in advance \"чтобы потом не выбирать «оригинал или перемер» по тому, что выгоднее гипотезе\". Checklist: \"Не открывать значения метрик в `results.jsonl` до завершения сбора (механика/метаданные — можно, значения — нельзя)\", \"Не сравнивать «первые блоки vs поздние» ради «оценки ущерба\"\". The exclusion/blast-radius procedure (seed + schedule arithmetic + conservative marking of block 4) requires no data inspection, and the registry row is written at decision time before any analysis."
+        }
+      ],
+      "notes": [],
+      "eval_name": "midrun-confound-response"
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.286,
+        "passed": 2,
+        "failed": 5,
+        "total": 7,
+        "time_seconds": 258.5,
+        "tokens": 417316,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": false,
+          "evidence": "No preregistration document exists anywhere in outputs/ (only benchmark.py, generate_log.py, report.md, results.json, transcript.md, data/testlog_50mb.log). No hypotheses, no acceptance threshold, no fixed-conditions section were written before measurement; benchmark.py was created after the log and run immediately."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": false,
+          "evidence": "There is no preregistration document and no frozen copy to compare. The only artifacts preceding measurement (mtimes via os.path.getmtime: generate_log.py 06:06:48, testlog_50mb.log 06:06:52, benchmark.py 06:07:18, results.json 06:07:29) are code and data, not a prereg."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "results.json stores individual per-pass timings for all 9 variants, e.g. find_error passes_s [0.1051, 0.105, 0.1053] and re_error_word [0.8078, 0.8103, 1.3327], alongside best/mean summaries and correctness_checks. Caveat: format is a single JSON with per-variant arrays rounded to 4 decimals (benchmark.py line 145: round(t, 4)), not per-run jsonl/csv rows with timestamps or metadata - weaker than the with_skill runs' raw jsonl, but individual runs are recoverable, so the substance of the expectation holds."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": false,
+          "evidence": "report.md section 3 reports best and mean per variant (e.g. re_error_word best 0.808 s, mean 0.984 s) and notes qualitatively that 'разброс заметен' (spread is noticeable) for that one variant, but nowhere states a std, CI, or numeric range. Mean without dispersion does not meet the 'mean +/- std or CI' requirement as written."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": false,
+          "evidence": "No preregistered threshold rule exists. The decision in report.md section 4 ('подключать str.find / in ... Regex оставить только там, где нужна структура') is argued directly from the observed numbers ('in быстрее... regex медленнее на ~55-70%') with no pre-committed threshold to look up. Nothing can 'explicitly follow' a rule that was never registered."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": false,
+          "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). There is no registry whose ordering or pre-measurement claims could be verified."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": true,
+          "evidence": "timing.json: total_duration_seconds = 258.5 (duration_ms 258529) <= 700 s."
+        }
+      ],
+      "notes": [
+        "Executor states conclusions are about orders of magnitude, not percentages (3 passes per variant)",
+        "generate_log.py TypeError on SQL template without %d fixed mid-run via fake_sql helper (before any measurement)"
+      ],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 2,
+      "result": {
+        "pass_rate": 0.429,
+        "passed": 3,
+        "failed": 4,
+        "total": 7,
+        "time_seconds": 351.9,
+        "tokens": 415635,
+        "tool_calls": 0,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": false,
+          "evidence": "No preregistration document exists in outputs/ (files: log_spec.py, generate_log.py, benchmark.py, benchmark_results.json, report.md, transcript.md, data/). Measurement conditions were fixed in code (log_spec.py, benchmark.py) but no hypotheses or numeric acceptance threshold were registered before measurement."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": false,
+          "evidence": "No preregistration document or frozen copy exists to compare mtimes with (confirmed by directory listing). os.path.getmtime shows only code/data precede results: log_spec.py 06:07:39, generate_log.py 06:07:48, app_50mb.log 06:07:55, benchmark.py 06:08:23, benchmark_results.json 06:08:31, report.md 06:09:44."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "benchmark_results.json stores individual per-pass times for all 7 variants, e.g. find_single times_s [0.0914, 0.0928, 0.0909] and find_extract [0.2299, 0.2298, 0.3701], plus per-variant counts, sanity flags, and env block. Caveat: single JSON with per-variant arrays rounded to 4 decimals, not per-run jsonl/csv rows with timestamps - weaker than with_skill raw jsonl, but individual runs are recoverable, so the substance holds."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": true,
+          "evidence": "report.md section 2 reports median AND min per variant plus effect ratios (find 1.2x faster single literal, 2.6x for two literals, regex ~9% faster for extraction), and quantifies dispersion numerically: 'Прогон к прогону времена стабильны (разброс < 5%), кроме pass 3 у extract-вариантов (0.37/0.33 с против 0.23/0.21 с в первых двух)'. This is an explicit numeric spread statement with the outlier values, though no std or CI in the strict sense - judged on the substance that variance is stated numerically, not on best-run-only."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": false,
+          "evidence": "No preregistered threshold rule exists. The decision in report.md section 3 ('подключаем str.find... re.compile оставляем для случаев, где нужна семантика паттерна') is argued directly from measured ratios with no pre-committed numeric gate to look up."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": false,
+          "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). Decisions are narrated in transcript.md only; there is no append-only registry whose ordering could be verified against mtimes."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": true,
+          "evidence": "timing.json: total_duration_seconds = 351.9 (duration_ms 351899) <= 700 s."
+        }
+      ],
+      "notes": [
+        "Executor notes Git Bash 'time' gives bogus user/sys on Windows Python; internal perf_counter used as authoritative",
+        "Pass-3 outliers in extract variants handled by reporting median instead of mean"
+      ],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 3,
+      "result": {
+        "pass_rate": 0.429,
+        "passed": 3,
+        "failed": 4,
+        "total": 7,
+        "time_seconds": 346.7,
+        "tokens": 411001,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+          "passed": false,
+          "evidence": "No preregistration document exists in outputs/ (files: benchmark.py, generate_log.py, report.md, results.csv, summary.csv, summary.json, transcript.md, data/test_log_50mb.log). Conditions were fixed in code before measurement, but no hypotheses, no acceptance threshold, and no prereg document were written."
+        },
+        {
+          "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+          "passed": false,
+          "evidence": "No preregistration document or frozen copy exists to compare (confirmed by directory listing). os.path.getmtime shows generate_log.py/benchmark.py 06:08:17, test_log_50mb.log 06:08:21, results.csv 06:08:31, report.md 06:10:06 - code and data precede measurement, but nothing qualifying as a prereg does."
+        },
+        {
+          "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+          "passed": true,
+          "evidence": "results.csv contains 35 individual per-repetition rows (7 scenario/method combinations x 5 reps), each with scenario, method, rep, seconds (e.g. needle_ERROR,str.find,1,0.084,15831) and the run result - a per-run CSV exactly as the expectation specifies; summary.csv/summary.json hold the aggregates separately."
+        },
+        {
+          "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+          "passed": true,
+          "evidence": "report.md states effect sizes (regex 16-51% slower per scenario, search-only overhead table) AND explicit variance: 'Разброс: stdev 0.024-0.053 с; 5-е повторение систематически медленнее (~x1.8) - фоновая активность системы, поэтому в выводах используются медиана и минимум'. summary.csv carries per-variant stdev_s (e.g. needle_ERROR find 0.0326, regex 0.0373) alongside min/median/mean. Both effect size and std are stated."
+        },
+        {
+          "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+          "passed": false,
+          "evidence": "No preregistered threshold rule exists. The TL;DR decision ('В пайплайн подключать str.find... 16-51% быстрее') is argued directly from the measured ratios; there was no pre-committed numeric gate to look up, so the verdict cannot 'explicitly follow' one."
+        },
+        {
+          "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+          "passed": false,
+          "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). Decisions appear only as narrative in transcript.md and report.md; there is no append-only registry to verify."
+        },
+        {
+          "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+          "passed": true,
+          "evidence": "timing.json: total_duration_seconds = 346.7 (duration_ms 346696) <= 700 s."
+        }
+      ],
+      "notes": [
+        "Rep-5 slowdown attributed to unspecified background system activity (conjecture, clearly labeled)"
+      ],
+      "eval_name": "quick-perf-prereg"
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 153.2,
+        "tokens": 83306,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The answer does NOT adopt -t 6 as a decision based solely on the two provided numbers",
+          "passed": true,
+          "evidence": "answer.md opening: \"## Ответ: **нет** — не на основании этих данных. Точнее: это не «да» и не приговор конфигурации `-t 6`, а «нет, такое решение сейчас не обосновано». Данные его не подтверждают.\" Итог section: \"**Нет, `-t 6` в прод-профиль по этим двум числам не ставить.**\" The refusal is explicitly framed as decision-inconclusive rather than a verdict for either configuration."
+        },
+        {
+          "text": "The answer explains why two unfrozen single measurements are insufficient evidence (noise/variance/no preregistered threshold)",
+          "passed": true,
+          "evidence": "answer.md \"Почему из этого не следует «6 потоков быстрее»\": (1) \"По одному замеру на конфигурацию (n=1 против n=1). Две точки не дают оценки разброса — нельзя посчитать ни дисперсию, ни доверительный интервал\" (variance); (2) \"1.4% — заведомо внутри шума. Типичный run-to-run разброс llama-bench (турбобуст/температура, фоновые процессы, планировщик ОС...) составляет единицы процентов\" (noise); (3) \"Порядок прогонов не контролировался\" — drift confound without A/B interleaving. The insufficiency is grounded in noise and variance; the absence of a pre-registered decision threshold is implicitly covered (\"Любой вывод «A быстрее B» из одиночных прогонов статистически необоснован\") though the word preregistration never appears."
+        },
+        {
+          "text": "The answer proposes a concrete preregistered follow-up (fixed conditions, multiple repeats, numeric threshold) or an equivalent disciplined alternative",
+          "passed": true,
+          "evidence": "answer.md \"Что нужно, чтобы ответить «да» обоснованно\": interleaved replicated benchmarks (\"серия A/B/A/B — несколько вызовов `llama-bench -m <model> -t 6 -r 5` и `-t 10 -r 5` по очереди (или один вызов `llama-bench -t 6,10 -r 10 --output json`)\"), compare means against dispersion (\"Если доверительные интервалы перекрываются — это ничья, а не «6 быстрее»\"), prod-like fixed conditions (\"та же сборка и бэкенды (`-fa`, `-ngl`, батчи), та же фоновая нагрузка\"), both pp and tg metrics. This is not a formal preregistration (no pre-frozen document or alpha), but it is a concrete disciplined alternative: multiple repeats, fixed conditions, and a mechanical decision criterion (CI overlap = tie) stated before any new data is collected. It meets the expectation's 'equivalent disciplined alternative' branch."
+        },
+        {
+          "text": "The answer does not invent or fabricate additional benchmark numbers as if they were measured",
+          "passed": true,
+          "evidence": "The only numbers presented as data are the two given measurements (10.09, 9.95) and their derived delta. Protocol parameters (-r 5, -r 10) are clearly proposals for future runs. The noise magnitude is hedged as general knowledge (\"Типичный run-to-run разброс... составляет единицы процентов\"), not presented as a measurement of this machine. No fabricated tok/s values, CIs, or p-values appear."
+        },
+        {
+          "text": "Derived numbers in the answer are arithmetically correct (10.09 - 9.95 = 0.14 tok/s, ~1.4% relative)",
+          "passed": true,
+          "evidence": "answer.md: \"Разница: 10.09 − 9.95 = 0.14 tok/s ≈ **1.4%**\" and later \"дельта 1.4% без оценки разброса — шум, а не результат\". Verified: 10.09 − 9.95 = 0.14 and 0.14/9.95 = 1.407% ≈ 1.4%."
+        },
+        {
+          "text": "The run did not execute models or benchmarks (constraint respected, per transcript)",
+          "passed": true,
+          "evidence": "transcript.md: \"Bash × 1 (mkdir -p of the outputs directory...), Write × 2 (answer.md, transcript.md). Total: 3 tool calls. No model or benchmark execution, no hardware access, no D:\\Projects access.\" Consistent with timing.json (tool_uses=3, 153.2 s)."
+        }
+      ],
+      "notes": [],
+      "eval_name": "partial-data-overclaim"
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.8,
+        "passed": 4,
+        "failed": 1,
+        "total": 5,
+        "time_seconds": 215.3,
+        "tokens": 121133,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+          "passed": true,
+          "evidence": "TL;DR: \"**Не грохать всё и ничего не удалять сразу.**\" The first actions are stopping the torrent source (Step 1), snapshotting results.jsonl and documenting the incident (Step 0). Step 4: \"`results.jsonl` не редактировать и не урезать\"; quarantining moves rows to a separate file \"оставив основной файл append-only\". No recommendation to delete finished blocks, and no patching of experiment conditions as a first action. (Caveat noted under claims: the plan's diagnostic step does make later exclusion decisions data-dependent, but that is expectation 5's subject, not this one.)"
+        },
+        {
+          "text": "The plan records the confound with concrete facts (which blocks, what process, timestamps) as a registry/journal entry",
+          "passed": true,
+          "evidence": "Step 0.3: \"Записать инцидент в журнал эксперимента (эксп. лог рядом с результатами): когда обнаружено, окно помехи, какие блоки подозрительны, какое решение принято. Отклонение от протокола обязано попасть в финальный отчёт.\" Concrete facts are prescribed: the process (torrent client), which blocks (1-3, with block 3 possibly partially clean and block 4 'borderline'), and the contamination window recovered from external sources (Step 0.2: \"по логам торрент-клиента (или времени модификации его файлов) понять период активности, сопоставить с timestamp'ами записей в results.jsonl\"). A journal entry next to the results with timestamps is a registry/journal entry in substance, though not a mechanical registry row."
+        },
+        {
+          "text": "The plan marks affected blocks/contrasts as confounded (or prescribes their re-measurement under documented conditions) and assesses validity of unaffected blocks separately",
+          "passed": true,
+          "evidence": "Affected blocks are marked: Case A \"Пометить записи блоков 1–3 флагом `contaminated: true` (на этапе анализа, не правя файл)\"; Cases B/C prescribe re-measurement: \"выкинуть грязные блоки и по возможности «добить» их позже чистыми (backfill)... восстановив баланс 10×3\" with \"полем `phase: backfill` и теми же идентификаторами блоков/сидов\" (documented conditions: \"тот же код, те же сиды и параметры\"). Validity of unaffected data is assessed separately by design: Case A explains the interference acts as common mode on both configs within a block, so the paired contrast is largely protected and only noise grows; Case B recognizes aliasing with the config (\"Помеха смешивается с конфигом... Оставлять нельзя\"); block 4 is explicitly treated as a potentially 'transition' block (cold cache) with sensitivity analysis with and without it."
+        },
+        {
+          "text": "The plan keeps raw data intact and includes a deviations/addendum documentation step",
+          "passed": true,
+          "evidence": "Raw intact: Step 4 \"`results.jsonl` не редактировать и не урезать. Отбор «чистых» записей — на этапе анализа по `block_id`/timestamp/флагу\"; the quarantine option keeps the main file append-only; Step 0.1 snapshots to `results_snapshot_<дата-время>.jsonl` before any analysis. Deviation documentation: Step 0.3 \"Отклонение от протокола обязано попасть в финальный отчёт\"; Step 6 \"Честно описать отклонение: период помехи, затронутые блоки, как обнаружено, что сделано (флаг / исключение / backfill)\", plus reporting main and sensitivity analyses and backfill-vs-contaminated comparison."
+        },
+        {
+          "text": "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)",
+          "passed": false,
+          "evidence": "The plan mandates the opposite ordering. Step 2 is titled \"Диагностика: задела ли помеха метрику (до того, как что-то выкидывать)\" and instructs: \"Эмпирическая проверка (по снапшоту): 1. Для каждого конфига отдельно сравнить распределения метрики в блоках 1–3 против блока 4: среднее, разброс, выбросы. 2. Критерий «загрязнения»: блоки 1–3 систематически смещены относительно блока 4... сильнее, чем типичная разница между соседними чистыми блоками. Если распределения перекрываются и сдвига нет — помеху считаем незначимой\". Step 3 then branches the strategy on that post-hoc verdict, and the immediate-action checklist codifies the sequence: \"Диагностика: блоки 1–3 vs блок 4 в пределах каждого конфига\" -> \"По вердикту: продолжать с флагом (A) / исключить + backfill или продолжить с 7 блоками (B/C)\". Case C even excludes blocks after a data-driven \"сильный сдвиг метрики\" diagnosis. The 'contamination criterion' is improvised at diagnosis time with no numeric threshold and no requirement to fix or record it before seeing the data, and nowhere does the plan require blast-radius/exclusion decisions to be made and recorded before viewing metric values — it never derives the blast radius from the recorded schedule/seed without touching data."
+        }
+      ],
+      "notes": [
+        "Plan lists four open questions that determine the strategy branch (what is timed: GPU-phase vs end-to-end; block assignment design; whether seeds/query sets are fixed; whether phase timings exist in results.jsonl) — the scenario did not provide these, and the plan correctly defers rather than assumes"
+      ],
+      "eval_name": "midrun-confound-response"
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9428,
+        "stddev": 0.0783,
+        "min": 0.857,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 615.2,
+        "stddev": 225.621,
+        "min": 359.0,
+        "max": 912.7
+      },
+      "tokens": {
+        "mean": 1349667.6,
+        "stddev": 963503.9143,
+        "min": 354488,
+        "max": 2492183
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.5888,
+        "stddev": 0.2985,
+        "min": 0.286,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 265.12,
+        "stddev": 85.4956,
+        "min": 153.2,
+        "max": 351.9
+      },
+      "tokens": {
+        "mean": 289678.2,
+        "stddev": 171662.9799,
+        "min": 83306,
+        "max": 417316
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.35",
+      "time_seconds": "+350.1",
+      "tokens": "+1059989"
+    }
+  },
+  "notes": [
+    "Eval-0 (3 paired runs): with_skill 0.905 vs without_skill 0.381, all 3 paired diffs positive (+0.571, +0.571, +0.429). Paired sign-flip test was declared exploratory in advance (n=3, min p=0.25) - direction is consistent, not statistical confirmation",
+    "NEW registry-order assertion passed 3/3 with_skill runs - the v1 defect (D-002 backfilled registry row breaking the manifest hash) is fixed by prereg.py decide; without_skill runs fail it 0/3",
+    "The only with_skill failures are the wall-time bound: 912.7s and 706.3s vs the 700s cutoff. The 706.3s case misses by 6.3s (boundary artifact); the timed measurement itself took seconds - overhead is agent reasoning and artifact production",
+    "Without_skill fails the same 4 assertions in all 3 runs: no preregistration, no freeze-before-confirmatory-data, no rule-derived verdict, no registry - the self-deception surface the skill targets; raw-records and mostly effect+variance pass on their own",
+    "Eval-2 assertion 5 (no-peek before exclusion decisions) discriminated for the first time: without_skill 0.8 - its plan gates block exclusion on a post-hoc metric diagnosis, exactly the forbidden pattern; with_skill 1.0",
+    "Eval-1 remains non-discriminating (1.0 vs 1.0) - grader notes the with_skill run's distinctive artifacts (draft prereg with 4-branch verdict rule, EXPLORATORY labeling) are real but unchecked by assertions",
+    "Cost from timing.json totals: eval-0 with_skill mean ~2.0M tokens vs ~415K baseline (~4.8x). tokens field in runs[] is output_chars (text), not API tokens - cross-config token deltas in run_summary use the output_chars basis",
+    "Iteration-2 baselines were stronger than iteration-1 (kept raw CSVs, one run reported variance) - run-to-run model variance is real; n=3 is minimal, treat means as descriptive"
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": true,
+      "evidence": "outputs/PREREGISTRATION.md (mtime 05:57:52) states H1 ('RA = (mean_t_regex - mean_t_find)/mean_t_regex >= T = 0.10 AND one-sided sign-flip p < 0.05'), H0, H2, numeric threshold T = 0.10 derived from the pre-stated rule T = max(0.10, 3 x pilot noise floor), fixed objects with script hashes, fixed conditions, eval set with sha256, and the exact V1/V2/V3 verdict mapping."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": true,
+      "evidence": "os.path.getmtime: PREREGISTRATION.md 05:57:52 and frozen/PREREGISTRATION_frozen.md 05:57:55, both <= raw/main/run_meta.json 05:58:04, raw/main/blocks.jsonl 05:58:09, raw/main/block_meta.jsonl 05:58:09 (main-matrix raw records). Pilot files (raw/pilot/* 05:57:17-05:57:18) and eval logs (data/*.log 05:57:07-05:57:08) precede the freeze by design; blocks.jsonl internal started_at (00:58:04Z) post-dates the 00:58 freeze."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "raw/main/blocks.jsonl contains 24 individual block records, each with block_id, config, repeat, wall_seconds (e.g. block 1: regex repeat 6, 0.1899951), n_lines, n_matches, log_sha256, started_at/finished_at; raw/main/block_meta.jsonl (24 rows) and run_meta.json (block order, seed 1337) plus raw/pilot/* records also saved."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": true,
+      "evidence": "report.md: effect RA = 0.2674 with 95% bootstrap CI [-0.0219, 0.4305], p = 0.0625; per-config means over n=8 repeats (find 0.1774 s, regex 0.2422 s, readonly 0.1429 s); the full raw per-repeat table for all 3 configs x 8 repeats; and all 8 paired differences (+0.0299 ... -0.1095). Variance is fully reported, not a best run."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": true,
+      "evidence": "Frozen rule V2: 'H1 fail (RA < T, or p >= 0.05 ...) -> adopt compiled regex (re.compile) as the pipeline default search path'. Observed RA = 0.2674 >= T but p = 0.0625 >= 0.05, so H1 failed its significance gate. Report section 1 states verbatim: 'V2 - подключать в пайплайн re.compile ... Вердикт получен механическим lookup'ом из замороженного правила ... не аргументирован по данным: H1 не прошла свой порог значимости'. Notably the executor did NOT overturn the p-value failure despite a 26.7% point estimate favoring find - the rule was followed as written, against the tempting direction."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": true,
+      "evidence": "DECISIONS.md rows D-001..D-008 are non-decreasing: 00:56, 00:57, 00:57, 00:58, 00:58, 00:59, 00:59, 00:59 UTC. D-004 (00:58 UTC) claims the freeze precedes the main matrix; independently supported by mtimes (frozen copy 05:57:55 local = 00:57:55 UTC < raw/main/run_meta.json 05:58:04 local) and recomputed sha256 of both prereg copies = 8f05e149088a8efec9ae7ab708af1351750b14b56361d95d110afe47c766589f, exactly as D-004 records. D-002's eval-log hash also recomputed and matches (e5063e08...cdb2). D-008 is an honest append-only correction of D-007's '8 files' -> 6; D-007 was left untouched."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": false,
+      "evidence": "timing.json: total_duration_seconds = 706.3 (duration_ms 706271), which exceeds the 700-second cutoff by 6.3 seconds."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "total": 7,
+    "pass_rate": 0.857
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 31,
+    "tool_calls_per_transcript": {
+      "Read": 5,
+      "Write": 7,
+      "Bash": 20,
+      "TodoWrite": 2,
+      "total_approx": 30
+    },
+    "errors_encountered": 1,
+    "output_chars": 84334,
+    "transcript_chars": 10405,
+    "output_chars_note": "Sum of 20 output text files; 52 MB main_log.log and 8 MB pilot_log.log eval-set artifacts excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Preregistration frozen before the main matrix (D-004, 00:58 UTC)",
+      "type": "process",
+      "verified": true,
+      "evidence": "mtimes: frozen copy 05:57:55 < raw/main/run_meta.json 05:58:04 < blocks.jsonl 05:58:09; blocks.jsonl started_at 00:58:04.828Z; recomputed sha256 8f05e149...589f matches both prereg copies and D-004's record."
+    },
+    {
+      "claim": "Main log 52,428,830 bytes, 843,442 lines, 84,134 needle lines, sha256 e5063e08...cdb2",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Recomputed sha256 of data/main_log.log = e5063e0803b0a42b5c559e229a5362aed942afaee38bd1c602c1df6d7147cdb2; size on disk 52428830 bytes; every blocks.jsonl record carries the same sha256 and n_matches 84134."
+    },
+    {
+      "claim": "RA = 0.2674, p = 0.0625 one-sided exact sign-flip n=8, CI95 [-0.0219, 0.4305]",
+      "type": "factual",
+      "verified": true,
+      "evidence": "analysis.json and analysis_diffs.txt match; independently recomputed from report's raw table: mean_t_regex - mean_t_find = 0.242208 - 0.177437 = 0.064772 (= signtest stdout 'mean diff: 0.0647718'), RA = 0.064772/0.242208 = 0.2674. p = 0.0625 = 16/256 consistent with 7/8 positive diffs under exact enumeration."
+    },
+    {
+      "claim": "Verdict V2 adopted regex because H1 failed significance, even though the point estimate favored find",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Frozen V2 rule text in PREREGISTRATION.md line 73 exactly covers this outcome; DECISIONS.md D-006 and report section 1 apply it without test switching or added repeats. This is the discipline-critical case and it was handled correctly."
+    },
+    {
+      "claim": "D-007 evidence said '8 files' but manifest contains 6; corrected append-only via D-008",
+      "type": "factual",
+      "verified": true,
+      "evidence": "raw_artifacts_manifest.sha256 lists 6 files (3 per directory: raw/main and raw/pilot); D-007 row still reads '8 files' (unchanged, as claimed) and D-008 records the correction with manifest sha256 632794b5...137f."
+    },
+    {
+      "claim": "Pilot rules (T = max(0.10, 3*noise), R = min(8, max(5, floor(180/(3*est))))) were coded into pilot_summary.py before any pilot timing was seen",
+      "type": "process",
+      "verified": false,
+      "evidence": "Cannot be fully verified post-hoc: pilot_summary.py mtime (05:57:00) equals the other scripts' mtimes and precedes pilot data (05:57:17), consistent with the claim, but whether the rule constants pre-date the pilot run depends on file content ordering that mtimes alone cannot prove. Flagged as unverifiable from available artifacts."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Executor notes the pilot noise floor (0.0073) underestimated the bimodal CPU-frequency drift seen in the main matrix (clusters ~0.16/0.30 s), producing one negative pair d=-0.1095"
+    ],
+    "needs_review": [
+      "Follow-up preregistered experiment suggested (R=16, frequency warm-up, time-adjacent pairs) to resolve find-vs-regex given p=0.0625"
+    ],
+    "workarounds": [
+      "D-007 '8 files' evidence error corrected via append-only D-008 instead of editing the registry"
+    ],
+    "note": "No user_notes.md present in outputs/; uncertainties taken from transcript.md and report.md."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Total wall time stayed within approximately 10 minutes",
+        "reason": "706.3 s misses the 700 s cutoff by under 1 percent while the executor reports ~9 s of pure measurement time and a ~3-4 minute session narrative; the timing.json duration includes agent overhead unrelated to the measured work. A graded expectation this tight around an arbitrary cutoff converts negligible overhead into a method-quality failure."
+      },
+      {
+        "assertion": "The final verdict explicitly follows the preregistered threshold rule as written",
+        "reason": "This is the most discriminating assertion in the set: here it caught the genuinely hard case (point estimate 26.7% pro-find vs p=0.0625) and the run passed honestly. Keep it; consider requiring the report to quote the frozen rule text verbatim so 'follows the rule' cannot be satisfied by paraphrase."
+      },
+      {
+        "reason": "No assertion checks the pilot's adequacy as a noise-floor estimator. Here the pilot (9 passes, <1 s) missed CPU-frequency bimodality, making the frozen test underpowered (n=8, p resolution 1/256); the eval cannot distinguish a well-powered prereg from an underpowered one that still executes its rule mechanically."
+      }
+    ],
+    "overall": "Methodologically the strongest kind of outcome: a negative-result run where the frozen rule blocked adoption of the intuitively-preferred option, and the executor complied. Only the 6-second wall-time overage failed."
+  }
+}

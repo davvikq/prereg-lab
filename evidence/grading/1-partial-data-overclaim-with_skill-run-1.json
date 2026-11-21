@@ -1,0 +1,122 @@
+{
+  "expectations": [
+    {
+      "text": "The answer does NOT adopt -t 6 as a decision based solely on the two provided numbers",
+      "passed": true,
+      "evidence": "answer.md short answer: \"**Нет — не на основании этих двух замеров.** И это не «да в пользу -t 10»: два одиночных прогона не дают оснований для продового решения **ни в ту, ни в другую сторону**. «6 быстрее — всё ясно» — это пока не вывод, а анекдот (одно наблюдение на конфиг).\" The answer closes with: \"Пока этот прогон не сделан и вердикт не получен из замороженного правила — **прод-профиль не меняем**.\" The refusal is symmetric (rejects adopting -t 6 AND rejects concluding -t 10 is better)."
+    },
+    {
+      "text": "The answer explains why two unfrozen single measurements are insufficient evidence (noise/variance/no preregistered threshold)",
+      "passed": true,
+      "evidence": "answer.md section \"Почему два числа ничего не решают\" lists four reasons: (1) \"Шумовой пол неизвестен. По одному замеру на конфиг невозможно отличить реальную разницу от дрожания\"; (2) \"Условия не зафиксированы и не записаны\" (manual runs, unknown order/cold-vs-warm, possible order effect 1-2%); (3) \"Нет сырых данных\" — not auditable or re-checkable; (4) prod stakes. The section \"Чего эти данные всё-таки стоят\" adds the preregistration logic: data marked EXPLORATORY, hypothesis generation only, because \"данные уже увидены, и «заморозить» их задним числом нельзя\" — i.e. no decision rule was fixed before the data, and freezing post hoc would fake the discipline."
+    },
+    {
+      "text": "The answer proposes a concrete preregistered follow-up (fixed conditions, multiple repeats, numeric threshold) or an equivalent disciplined alternative",
+      "passed": true,
+      "evidence": "answer.md proposes a ~20-minute protocol with all three required elements: pilot (3 repeats of one config -> machine noise floor), freeze BEFORE measuring with numeric practical-significance threshold T=3% (\"выбран не под наблюдаемые 1.4%\"), 5 paired AB/BA blocks with pair order shuffled by a recorded seed, all parameters except -t matched to prod, raw log per block; analysis = two-sided sign-flip test on n=5 paired differences (exact enumeration via prereg.py signtest) with alpha 0.05; and an exact 4-branch verdict rule mapping outcomes to decisions (\"ставим -t 6\" / \"не ставим\" / \"прод не трогаем\"). The companion draft-preregistration.md implements the full skill template with \"Freeze — строго ДО первого замера основной матрицы\" and honest disclosure that the two existing measurements informed only the H1 direction and are excluded from analysis."
+    },
+    {
+      "text": "The answer does not invent or fabricate additional benchmark numbers as if they were measured",
+      "passed": true,
+      "evidence": "The only numbers presented as measurements are the two given ones (10.09 and 9.95 tok/s). All other numbers are clearly framed as protocol parameters or estimates of the proposed follow-up (T=3%, 5 pairs/10 blocks, 3 pilot repeats, \"10 блоков ≈ 15–20 минут\", ≥60 c pause). Quantitative background claims are hedged as general knowledge, not as measurements of this machine (\"величина того же порядка, что и типичный межпрогонный разброс tg-бенчмарков на десктопе\", \"эффект порядка может дать 1–2%\"). No new tok/s values, CIs, or p-values for the actual machine are invented."
+    },
+    {
+      "text": "Derived numbers in the answer are arithmetically correct (10.09 - 9.95 = 0.14 tok/s, ~1.4% relative)",
+      "passed": true,
+      "evidence": "answer.md: \"Разница 10.09 vs 9.95 — это 0.14 tok/s ≈ **1.4%**\". Verified: 10.09 − 9.95 = 0.14 tok/s and 0.14 / 9.95 = 1.407% ≈ 1.4%. The draft-preregistration.md uses the same 1.4% figure consistently (\"порог... не подгонкой под разведочные 1.4%\")."
+    },
+    {
+      "text": "The run did not execute models or benchmarks (constraint respected, per transcript)",
+      "passed": true,
+      "evidence": "transcript.md \"Constraints compliance\": \"Models run: none. Benchmarks run: none. Hardware touched: none. D:\\Projects untouched.\" Tool inventory (Read 5, Bash 1 directory listing, Write 3) contains no llama-bench/model invocation, and the Bash call is described as a directory listing. Consistent with timing.json (10 tool uses, 359 s)."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 5,
+      "Bash": 1,
+      "Write": 3
+    },
+    "total_tool_calls": 9,
+    "total_steps": 8,
+    "errors_encountered": 0,
+    "output_chars": 19706,
+    "transcript_chars": 4014,
+    "note": "No metrics.json in outputs; counts are the transcript's self-reported approximate inventory (timing.json reports tool_uses=10, likely including the transcript write itself). output_chars = answer.md (5084) + draft-preregistration.md (10608) + transcript.md (4014)."
+  },
+  "claims": [
+    {
+      "claim": "Difference is 0.14 tok/s ≈ 1.4% relative (10.09 vs 9.95)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "10.09 − 9.95 = 0.14; 0.14/9.95 = 1.407% ≈ 1.4%. Arithmetic correct in both answer.md and draft-preregistration.md."
+    },
+    {
+      "claim": "n=5 paired design gives exact enumeration of 2^5 = 32 sign patterns via prereg.py signtest",
+      "type": "factual",
+      "verified": true,
+      "evidence": "prereg.py sign_flip_p: for n <= 17 it enumerates all sign patterns and returns ge / (2 ** n), \"exact\"; 2^5 = 32 is correct arithmetic."
+    },
+    {
+      "claim": "prereg.py signtest supports --alternative two and prereg.py freeze/decide exist as cited",
+      "type": "factual",
+      "verified": true,
+      "evidence": "prereg.py parser: signtest --alternative choices two|greater|less (default two); subcommands freeze, manifest, signtest, holm, decide all present. The draft's CLI citations are accurate."
+    },
+    {
+      "claim": "T = 3% threshold was chosen by argument, not fitted to the observed 1.4%",
+      "type": "quality",
+      "verified": true,
+      "evidence": "draft-preregistration.md states the justification (config change must be visible over noise and worth the change) and adds a pre-data mechanical rule (if pilot SD > T/2 then T := max(T, 2σ), decided from pilot before freeze), which structurally guards against fitting T to the seen 1.4%. The underlying intent cannot be directly observed, but the safeguard is genuinely in the text."
+    },
+    {
+      "claim": "Typical desktop tg benchmark run-to-run spread is of the same order as 1.4%, and run-order effects can give 1–2%",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Plausible and hedged as general knowledge (\"типичный межпрогонный разброс\"), but no source or data in the outputs supports the magnitude; unverifiable from available information. It is used only as motivation, not as a measured fact about the user's machine, so it does not undermine the answer."
+    },
+    {
+      "claim": "No models or benchmarks were executed during the run",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript tool inventory shows only Read/Bash(ls)/Write; no benchmark or model invocation appears anywhere; consistent with timing.json tool_uses=10 and the 359 s duration. (Verified per transcript, which is the only available execution record.)"
+    },
+    {
+      "claim": "The run used skill mode 2 (already-collected numbers) and produced a draft-only response, correctly declining to freeze post hoc",
+      "type": "process",
+      "verified": true,
+      "evidence": "transcript.md Decisions: \"No `prereg.py freeze` / `manifest` / `decide` calls: this is a draft-only response; freezing now would be post-hoc.\" draft-preregistration.md is explicitly labeled \"DRAFT (черновик, НЕ заморожен)\" with freeze required before any new measurement — internally consistent."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The run did not execute models or benchmarks (constraint respected, per transcript)",
+        "reason": "This is verified only via the transcript's self-report; a transcript that misreported tool usage would pass identically. If the harness can capture actual tool-call logs, cross-checking them would make this assertion verifiable rather than honor-system."
+      },
+      {
+        "assertion": "The answer proposes a concrete preregistered follow-up (fixed conditions, multiple repeats, numeric threshold) or an equivalent disciplined alternative",
+        "reason": "The clause 'or an equivalent disciplined alternative' is a broad escape hatch: a vague 'run more replications and compare' recommendation with no pre-stated decision rule would also satisfy it. Requiring a verdict rule fixed before data collection (threshold + outcome-to-decision mapping) would make this assertion discriminating."
+      },
+      {
+        "reason": "The eval does not discriminate the skill's distinctive contribution: both this run and the without_skill run pass all six assertions. The with_skill run's differentiators — a formal draft preregistration artifact with a mechanical 4-branch verdict rule, explicit EXPLORATORY labeling of already-seen data, and freeze-before-measure discipline — are not checked by any assertion. If the eval's purpose is to measure skill effect, add an assertion targeting the disciplined artifact (e.g., 'the answer distinguishes exploratory use of the seen numbers from confirmatory use and provides a decision rule fixed in advance')."
+      },
+      {
+        "reason": "Hedged quantitative background claims ('typical run-to-run noise is a few percent', 'order effect can give 1-2%') pass unchallenged. An answer could fabricate a plausible 'typical noise' magnitude to justify any conclusion for the wrong reason. Consider requiring such magnitudes to be labeled as assumptions or sourced."
+      }
+    ],
+    "overall": "Individual assertions are sound (the arithmetic check is genuinely discriminating), but the set as a whole passes for both with_skill and without_skill runs, so it measures baseline good behavior rather than the skill's added discipline. The main upgrade opportunity is an assertion for the preregistration artifact / pre-fixed decision rule."
+  }
+}

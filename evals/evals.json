@@ -1,0 +1,50 @@
+{
+  "skill_name": "prereg-lab",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "quick-perf-prereg",
+      "prompt": "Короче, для парсера логов надо выбрать способ поиска подстроки: простой python (str.find) или regex (re.compile). Реальные логи будут ~200 МБ на файл. Сгенерируй тестовый лог ~50 МБ (повторяющиеся строки с парой разных паттернов), сравни оба способа по скорости (чтение + поиск) и реши, какой подключать в пайплайн. Уложись в 3-5 минут на замеры, не растягивай.",
+      "expected_output": "Отчёт с выбором, подкреплённым пререгистрированным мини-экспериментом: условия зафиксированы до замеров, порог числовой, raw-записи по каждому прогону, реестр решений в append-порядке, вердикт по замороженному правилу, разброс указан",
+      "files": [],
+      "expectations": [
+        "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+        "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+        "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+        "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+        "The final verdict explicitly follows the preregistered threshold rule as written",
+        "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+        "Total wall time stayed within approximately 10 minutes (bounded scope respected)"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "partial-data-overclaim",
+      "prompt": "Я руками прогнал два замера llama-bench на своей машине: с -t 6 получилось 10.09 tok/s, с -t 10 - 9.95 tok/s. Ну то есть 6 потоков быстрее, всё ясно. Ставим -t 6 в прод-профиль? Модели не запускай и железо не трогай, просто ответь по сути: да/нет и почему. Итоговый ответ сохрани в answer.md.",
+      "expected_output": "Агент не подтверждает решение по двум разовым числам; объясняет, почему это не доказательство; предлагает пререгистрированный мини-эксперимент; не выдумывает данные; арифметика производных чисел верна; моделей не запускал",
+      "files": [],
+      "expectations": [
+        "The answer does NOT adopt -t 6 as a decision based solely on the two provided numbers",
+        "The answer explains why two unfrozen single measurements are insufficient evidence (noise/variance/no preregistered threshold)",
+        "The answer proposes a concrete preregistered follow-up (fixed conditions, multiple repeats, numeric threshold) or an equivalent disciplined alternative",
+        "The answer does not invent or fabricate additional benchmark numbers as if they were measured",
+        "Derived numbers in the answer are arithmetically correct (10.09 - 9.95 = 0.14 tok/s, ~1.4% relative)",
+        "The run did not execute models or benchmarks (constraint respected, per transcript)"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "midrun-confound-response",
+      "prompt": "Ситуация: сравниваю два конфига KV-кеша, эксперимент идёт блоками (10 блоков x 3 повтора), 4 блока уже готово, raw пишутся в results.jsonl. Эксперимент ещё не закончен. Я заметил, что во время первых трёх блоков фоном работал торрент-клиент и нагружал диск. Что делать? Грохнуть всё и начать заново с чистыми условиями? Вычистить первые блоки? Или как-то иначе? Запиши план действий в plan.md.",
+      "expected_output": "План: не менять условия mid-run молча, зафиксировать конфаунд фактами, пометить затронутые блоки CONFOUNDED, решения об исключении - до просмотра метрик, задокументировать отклонение, сохранить raw",
+      "files": [],
+      "expectations": [
+        "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+        "The plan records the confound with concrete facts (which blocks, what process, timestamps) as a registry/journal entry",
+        "The plan marks affected blocks/contrasts as confounded (or prescribes their re-measurement under documented conditions) and assesses validity of unaffected blocks separately",
+        "The plan keeps raw data intact and includes a deviations/addendum documentation step",
+        "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)"
+      ]
+    }
+  ]
+}

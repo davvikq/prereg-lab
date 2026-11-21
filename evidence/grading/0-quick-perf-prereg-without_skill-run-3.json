@@ -1,0 +1,117 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": false,
+      "evidence": "No preregistration document exists in outputs/ (files: benchmark.py, generate_log.py, report.md, results.csv, summary.csv, summary.json, transcript.md, data/test_log_50mb.log). Conditions were fixed in code before measurement, but no hypotheses, no acceptance threshold, and no prereg document were written."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": false,
+      "evidence": "No preregistration document or frozen copy exists to compare (confirmed by directory listing). os.path.getmtime shows generate_log.py/benchmark.py 06:08:17, test_log_50mb.log 06:08:21, results.csv 06:08:31, report.md 06:10:06 - code and data precede measurement, but nothing qualifying as a prereg does."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "results.csv contains 35 individual per-repetition rows (7 scenario/method combinations x 5 reps), each with scenario, method, rep, seconds (e.g. needle_ERROR,str.find,1,0.084,15831) and the run result - a per-run CSV exactly as the expectation specifies; summary.csv/summary.json hold the aggregates separately."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": true,
+      "evidence": "report.md states effect sizes (regex 16-51% slower per scenario, search-only overhead table) AND explicit variance: 'Разброс: stdev 0.024-0.053 с; 5-е повторение систематически медленнее (~x1.8) - фоновая активность системы, поэтому в выводах используются медиана и минимум'. summary.csv carries per-variant stdev_s (e.g. needle_ERROR find 0.0326, regex 0.0373) alongside min/median/mean. Both effect size and std are stated."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": false,
+      "evidence": "No preregistered threshold rule exists. The TL;DR decision ('В пайплайн подключать str.find... 16-51% быстрее') is argued directly from the measured ratios; there was no pre-committed numeric gate to look up, so the verdict cannot 'explicitly follow' one."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": false,
+      "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). Decisions appear only as narrative in transcript.md and report.md; there is no append-only registry to verify."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": true,
+      "evidence": "timing.json: total_duration_seconds = 346.7 (duration_ms 346696) <= 700 s."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 4,
+    "total": 7,
+    "pass_rate": 0.429
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 12,
+    "tool_calls_per_transcript": {
+      "Bash": 4,
+      "Write": 4,
+      "Read": 1,
+      "total_approx": 9
+    },
+    "errors_encountered": 0,
+    "output_chars": 30004,
+    "transcript_chars": 4137,
+    "output_chars_note": "Sum of 7 output text files; 50 MB test_log_50mb.log excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Log 394,235 lines / 52,432,100 bytes (50.0 MiB), seed 20261121",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -l gives 394235; file size on disk 52432100 bytes; summary.json and report.md agree."
+    },
+    {
+      "claim": "Equivalence across all reps: ERROR 15,831; status=500 3,132; id 394,235 identical for find and regex",
+      "type": "factual",
+      "verified": true,
+      "evidence": "results.csv 'result' column is identical between find and regex rows for every repetition (15831/15831, 3132/3132, [394235, 3153880] twice per rep)."
+    },
+    {
+      "claim": "Rep 5 systematically ~1.8x slower across all scenarios (background activity), handled via median and min",
+      "type": "factual",
+      "verified": true,
+      "evidence": "results.csv rep-5 rows: read_only 0.1049 vs 0.0504-0.0524; find 0.1579 vs 0.084-0.0857; regex 0.1824 vs 0.0979-0.0998 - roughly 1.8-2x on every combination, matching the claim."
+    },
+    {
+      "claim": "Regex 16-51% slower than find across scenarios (full pass time)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Medians: 0.0992/0.0854 = +16.2%; 0.1066/0.0889 = +19.9% (~20% claimed); 0.1958/0.1297 = +51.0%. Matches the report table exactly."
+    },
+    {
+      "claim": "Benchmark took ~5-6 s (transcript) / ~25-30 s total (report)",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Internally inconsistent: transcript says the benchmark call took ~5-6 s and mtimes agree (benchmark start ~06:08:26, results.csv 06:08:31), while report.md states '~25-30 с суммарно'. The report figure appears inflated/erroneous; measurement-time bookkeeping is not reliable here, though it does not affect the verdict."
+    },
+    {
+      "claim": "36 timed passes (transcript) vs 35 timed passes + 1 warmup (report)",
+      "type": "quality",
+      "verified": false,
+      "evidence": "results.csv has exactly 35 timed rows (7 x 5). The report's '35 таймированных проходов + 1 разогревочный' is correct; the transcript's '36 таймированных проходов' miscounts (likely including the warmup). Minor narrative error."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Rep-5 slowdown attributed to unspecified background system activity (conjecture, clearly labeled)"
+    ],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs/; items taken from transcript.md and report.md."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The final report states effect size AND variance (mean +/- std or CI)",
+        "reason": "This control run passes cleanly (explicit stdev in report and summary.csv), showing the assertion does discriminate on statistics quality rather than skill vocabulary - useful contrast with run D (qualitative only) and run E (spread percentage). Keep as is."
+      },
+      {
+        "reason": "No assertion checks internal consistency between transcript and report. Here the report inflates the benchmark duration (~25-30 s vs the actual ~5 s per mtimes) and the transcript miscounts passes (36 vs 35); small, but an eval asserting 'transcript and report agree on measurement bookkeeping' would catch this class of error for free."
+      }
+    ],
+    "overall": "The best control run statistically: per-run CSV records, explicit stdev, honest outlier handling, and verified equivalence checks. Fails only on the preregistration-specific expectations (1, 2, 5, 6), which is exactly the behavior gap the skill targets."
+  }
+}

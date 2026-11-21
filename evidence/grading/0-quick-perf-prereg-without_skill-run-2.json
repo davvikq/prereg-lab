@@ -1,0 +1,114 @@
+{
+  "expectations": [
+    {
+      "text": "A preregistration document exists that states hypotheses, a numeric acceptance threshold, and fixed measurement conditions",
+      "passed": false,
+      "evidence": "No preregistration document exists in outputs/ (files: log_spec.py, generate_log.py, benchmark.py, benchmark_results.json, report.md, transcript.md, data/). Measurement conditions were fixed in code (log_spec.py, benchmark.py) but no hypotheses or numeric acceptance threshold were registered before measurement."
+    },
+    {
+      "text": "The preregistration (and its frozen copy) mtime <= mtime of the confirmatory measurement data (main-matrix raw records, e.g. runs.jsonl). Pilot or eval-set generation files may precede the freeze by design.",
+      "passed": false,
+      "evidence": "No preregistration document or frozen copy exists to compare mtimes with (confirmed by directory listing). os.path.getmtime shows only code/data precede results: log_spec.py 06:07:39, generate_log.py 06:07:48, app_50mb.log 06:07:55, benchmark.py 06:08:23, benchmark_results.json 06:08:31, report.md 06:09:44."
+    },
+    {
+      "text": "Raw per-run records were saved (individual runs in jsonl/csv files), not only summary statistics",
+      "passed": true,
+      "evidence": "benchmark_results.json stores individual per-pass times for all 7 variants, e.g. find_single times_s [0.0914, 0.0928, 0.0909] and find_extract [0.2299, 0.2298, 0.3701], plus per-variant counts, sanity flags, and env block. Caveat: single JSON with per-variant arrays rounded to 4 decimals, not per-run jsonl/csv rows with timestamps - weaker than with_skill raw jsonl, but individual runs are recoverable, so the substance holds."
+    },
+    {
+      "text": "The final report states effect size AND variance (mean +/- std or CI), not just the best single run",
+      "passed": true,
+      "evidence": "report.md section 2 reports median AND min per variant plus effect ratios (find 1.2x faster single literal, 2.6x for two literals, regex ~9% faster for extraction), and quantifies dispersion numerically: 'Прогон к прогону времена стабильны (разброс < 5%), кроме pass 3 у extract-вариантов (0.37/0.33 с против 0.23/0.21 с в первых двух)'. This is an explicit numeric spread statement with the outlier values, though no std or CI in the strict sense - judged on the substance that variance is stated numerically, not on best-run-only."
+    },
+    {
+      "text": "The final verdict explicitly follows the preregistered threshold rule as written",
+      "passed": false,
+      "evidence": "No preregistered threshold rule exists. The decision in report.md section 3 ('подключаем str.find... re.compile оставляем для случаев, где нужна семантика паттерна') is argued directly from measured ratios with no pre-committed numeric gate to look up."
+    },
+    {
+      "text": "The decisions registry (DECISIONS.md) shows append-order integrity: row timestamps are non-decreasing, and any decision claiming to precede measurements is supported by file mtimes or artifact manifest hashes, not only by its own text",
+      "passed": false,
+      "evidence": "No DECISIONS.md exists in outputs/ (confirmed by directory listing). Decisions are narrated in transcript.md only; there is no append-only registry whose ordering could be verified against mtimes."
+    },
+    {
+      "text": "Total wall time stayed within approximately 10 minutes (treat as satisfied if executor duration <= 700 seconds, from timing.json)",
+      "passed": true,
+      "evidence": "timing.json: total_duration_seconds = 351.9 (duration_ms 351899) <= 700 s."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 4,
+    "total": 7,
+    "pass_rate": 0.429
+  },
+  "execution_metrics": {
+    "metrics_json": "not present in outputs/",
+    "tool_uses_from_timing_json": 12,
+    "tool_calls_per_transcript": {
+      "Bash": 5,
+      "Write": 5,
+      "Edit": 1,
+      "Read": 1,
+      "total_approx": 12
+    },
+    "errors_encountered": 1,
+    "output_chars": 32087,
+    "transcript_chars": 8343,
+    "output_chars_note": "Sum of 7 output text files; 50 MB app_50mb.log and __pycache__ excluded from the char proxy."
+  },
+  "claims": [
+    {
+      "claim": "Deterministic generation verified: two runs byte-identical, sha256 79473997...f25977e",
+      "type": "process",
+      "verified": true,
+      "evidence": "Recomputed sha256 of data/app_50mb.log = 79473997bdca7d3706603c18e6303cdeab543483121f9fec473cbc242f25977e, matching log_meta.json and the report; the double-generation determinism check itself is a process claim consistent with the transcript chronology (two 1.4 s generation runs)."
+    },
+    {
+      "claim": "Log 52,834,466 bytes / 400,000 lines; hits 80,007 (single), 111,810 (two), sum duration_ms 844,342,490 identical for find and regex",
+      "type": "factual",
+      "verified": true,
+      "evidence": "File size on disk 52834466; benchmark_results.json counts and sanity blocks show hits equal across find/regex variants and all sanity flags true. (Line count not independently recomputed; consistent across all records.)"
+    },
+    {
+      "claim": "Regex extraction ~9% faster than find + manual parse",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Medians 0.2087 (regex_extract) vs 0.2299 (find_extract): find is 10.2% slower, i.e. regex ~9% faster relative to regex's own time - consistent with the claim as stated."
+    },
+    {
+      "claim": "Pass-3 outliers in extract variants are one-off background noise, handled via median",
+      "type": "quality",
+      "verified": true,
+      "evidence": "benchmark_results.json shows pass-3 times 0.3701/0.3256 vs ~0.23/0.21 for passes 1-2; medians correctly ignore them. Cause attribution (background process/antivirus) is untestable but clearly labeled as conjecture."
+    },
+    {
+      "claim": "Benchmark pure measurement time 3.8 s; total measurement work ~7 s",
+      "type": "process",
+      "verified": false,
+      "evidence": "Not independently verifiable post-hoc; plausible given 21 timed passes of 0.05-0.37 s each."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [
+      "Executor notes Git Bash 'time' gives bogus user/sys on Windows Python; internal perf_counter used as authoritative"
+    ],
+    "needs_review": [],
+    "workarounds": [
+      "Pass-3 outliers in extract variants handled by reporting median instead of mean"
+    ],
+    "note": "No user_notes.md present in outputs/; items taken from transcript.md."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The final report states effect size AND variance (mean +/- std or CI)",
+        "reason": "Boundary case: this run passed on a numeric '<5% spread plus explicit outlier values' statement, not a std or CI. If the eval intends strict std/CI, this run should fail; if it intends 'variance reported numerically, not best-run-only', the wording should say so. The current text sits between the two and invites inconsistent grading across runs."
+      },
+      {
+        "reason": "No assertion covers determinism verification, yet this control run did something genuinely good the skill runs did not: generated the log twice and diffed sha256 to prove determinism. An assertion rewarding reproducibility checks would separate strong executors from merely compliant ones."
+      }
+    ],
+    "overall": "Technically the strongest control run: interleaved passes, module-level compilation, sanity gates, quantified spread, honest outlier handling. It still fails 4/7 because preregistration, threshold rule, and registry are absent - precisely the skill's core value."
+  }
+}

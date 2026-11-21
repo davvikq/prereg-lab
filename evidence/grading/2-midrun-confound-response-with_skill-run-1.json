@@ -1,0 +1,114 @@
+{
+  "expectations": [
+    {
+      "text": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+      "passed": true,
+      "evidence": "plan.md rejects both directly: \"**«Грохнуть всё и начать заново» — не нужно и расточительно.**\" and \"**«Вычистить первые блоки» — нельзя.** Raw-файлы не редактируются и не удаляются никогда. Решение об исключении, принятое пост-фактум... — это то самое 'quietly fix a confound', против которого вся дисциплина.\" The first actions (Step 0) are stopping the external torrent process and recording facts; the plan explicitly distinguishes stopping the external process (\"останавливкой торрета вы возвращаетесь к замороженному протоколу для будущих блоков\") from patching run parameters (\"Чинить «тихо» параметр рана (потоки, конфиг, число блоков) по-прежнему нельзя\"). No deletion and no silent condition-patching anywhere in the plan."
+    },
+    {
+      "text": "The plan records the confound with concrete facts (which blocks, what process, timestamps) as a registry/journal entry",
+      "passed": true,
+      "evidence": "Step 1 prescribes an immediate DECISIONS.md registry row at decision time (\"в момент решения, не бэкфиллом\") via the exact command: `python prereg.py decide DECISIONS.md \"Торрент-клиент <имя процесса> нагружал диск во время блоков 1-3 (окно <t1>-<t2>); остановлен в <t3>; затронутые блоки/контрасты помечены CONFOUNDED; follow-up запланирован\" --evidence \"логи торрент-клиента <файл/путь>, timestamps block_meta.jsonl\"` — which blocks (1-3, plus block 4 pending timestamp check), what process (torrent client by name), timestamps (contamination window t1-t2, stop time t3). Step 1.2 additionally fills the journal's `anomalies` field of affected blocks in block_meta.jsonl (template-verified in the skill's templates.md: \"background process detected 22:14\"). Placeholders are used because actual timestamps were not given in the scenario; the plan says to recover them from external sources (torrent logs, block_meta.jsonl, Windows Event Log)."
+    },
+    {
+      "text": "The plan marks affected blocks/contrasts as confounded (or prescribes their re-measurement under documented conditions) and assesses validity of unaffected blocks separately",
+      "passed": true,
+      "evidence": "Step 2 derives blast radius from the recorded seed and deterministic schedule, not from data (\"Блок 4 считать затронутым, пока timestamps не докажут обратное — консервативная пометка не требует взгляда в данные\"); affected units are marked CONFOUNDED. Step 3 fixes in the addendum that affected blocks are either excluded from the verdict (descriptive only) or replaced wholesale by clean re-measures. Step 5 prescribes the registered follow-up re-measuring affected blocks under the same frozen conditions/eval set/order, originals kept with CONFOUNDED tag. Validity of unaffected data is assessed separately by design: paired blocks (within-block contrast structurally comparable if both sides measured under the same load — mirroring case study 1's 'both sides at 6 threads' logic) vs unpaired blocks (verdict needs clean units on both sides of the contrast); Step 6 restricts the verdict to units whose fixed conditions held on both sides."
+    },
+    {
+      "text": "The plan keeps raw data intact and includes a deviations/addendum documentation step",
+      "passed": true,
+      "evidence": "Raw intact: \"Raw-файлы не редактируются и не удаляются никогда\" (opening), \"оригиналы остаются на диске с пометкой CONFOUNDED — не удаляются и не затираются\" (Step 5), \"оригиналы затронутых блоков остаются в `results.jsonl` с пометкой CONFOUNDED\" (Step 3), and checklist \"Не удалять и не редактировать raw — никогда, ни затронутые, ни чистые\". Deviation documentation: Step 3 provides the full Deviation addendum template (\"**Changed after start <дата>, reason:** торрент-клиент... Blast radius: ... Original text above is unchanged\") to be frozen under a NEW name because \"prereg.py freeze **не перезаписывает** существующую замороженную копию\" (verified in prereg.py: freeze refuses to overwrite an existing frozen copy; --name flag exists); the report must contain a Deviations section with timestamps (\"обязателен даже если бы инцидента не было\"), and any metric values already seen must be recorded as a deviation (Step 0.4)."
+    },
+    {
+      "text": "The plan requires that exclusion/blast-radius decisions be made and recorded BEFORE viewing metric values (explicitly forbids choosing which blocks to drop after seeing their results)",
+      "passed": true,
+      "evidence": "Step 0.3: \"Запрещено открывать значения метрик и сравнивать «блоки 1–3 vs 4–10», чтобы «оценить ущерб» — это интерпретация до завершения сбора\". Step 2 header: \"Радиус поражения — из расписания, не из данных\" (\"Это арифметика расписания: значения метрик не читаются\"). Step 3 fixes the substitution rule in advance \"чтобы потом не выбирать «оригинал или перемер» по тому, что выгоднее гипотезе\". Checklist: \"Не открывать значения метрик в `results.jsonl` до завершения сбора (механика/метаданные — можно, значения — нельзя)\", \"Не сравнивать «первые блоки vs поздние» ради «оценки ущерба\"\". The exclusion/blast-radius procedure (seed + schedule arithmetic + conservative marking of block 4) requires no data inspection, and the registry row is written at decision time before any analysis."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 4,
+      "Bash": 2,
+      "Write": 2,
+      "Edit": 1
+    },
+    "total_tool_calls": 10,
+    "total_steps": 7,
+    "errors_encountered": 0,
+    "output_chars": 22393,
+    "transcript_chars": 3940,
+    "note": "No metrics.json in outputs; counts from transcript self-report (transcript counts 9 calls and notes the transcript Write itself is the 10th; timing.json reports tool_uses=10, consistent). The only defect found was a mixed-alphabet typo ('верdict' -> 'вердикт'), fixed via Edit. output_chars = plan.md (18453) + transcript.md (3940)."
+  },
+  "claims": [
+    {
+      "claim": "prereg.py freeze refuses to overwrite an existing frozen copy, so an addendum must be frozen under a new --name",
+      "type": "factual",
+      "verified": true,
+      "evidence": "prereg.py line 86 exits with \"freeze: {target} already exists. Do NOT overwrite - the change ...\" on existing frozen copy; usage line shows `freeze FILE [--copy-to DIR] [--name NAME]`. The plan's instruction (freeze addendum under PREREG_<exp>_frozen_addendum-1.md) is CLI-accurate; transcript notes this detail corrected an instruction the executor would otherwise have gotten wrong."
+    },
+    {
+      "claim": "prereg.py decide appends a registry row with a mechanical UTC timestamp and auto-numbering, and supports --evidence",
+      "type": "factual",
+      "verified": true,
+      "evidence": "prereg.py parser: `decide` help text is \"append a registry row with a mechanical UTC timestamp\"; it takes registry, decision, and --evidence arguments, matching the plan's command exactly."
+    },
+    {
+      "claim": "prereg.py signtest supports --diffs with a --seed flag, and a holm subcommand exists",
+      "type": "factual",
+      "verified": true,
+      "evidence": "prereg.py parser: signtest takes --diffs/--file/--alternative/--mc/--seed (default 1337); holm subcommand takes a list of p-values. The plan's cited analysis commands are CLI-accurate."
+    },
+    {
+      "claim": "The plan follows skill Phase 5 'Mid-run discoveries do not change conditions' and case study 1 'fix nothing, register everything'",
+      "type": "process",
+      "verified": true,
+      "evidence": "SKILL.md line 138: '### Phase 5: Run', with the rule 'Mid-run discoveries do not change conditions.' at line 154 inside that phase; case-studies.md case 1 is titled 'The confound discovered mid-run (fix nothing, register everything)' with the quoted lesson 'a mid-run confound is not an emergency, it is a bookkeeping event...' at line 25. The quoted phrase 'обе стороны на 6 потоках' matches case-studies.md line 21 ('both sides at 6 threads'). All skill citations in the plan are genuine and correctly characterized."
+    },
+    {
+      "claim": "templates.md's block_meta.jsonl format includes an 'anomalies' field anticipating background-process detection",
+      "type": "factual",
+      "verified": true,
+      "evidence": "templates.md line 121 contains: `\"n_records\": 96, \"anomalies\": [\"background process detected 22:14\"]}` — exactly as cited in the plan."
+    },
+    {
+      "claim": "Stopping the torrent process is restoring frozen conditions, not a mid-run patch",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Reasoned and justified in the plan: the frozen protocol requires a quiet machine; an external disk-loading process violates a fixed condition rather than being an experiment parameter, so stopping it restores compliance for future blocks while already-measured blocks remain as measured. The plan still forbids patching actual run parameters. Sound distinction, consistent with the skill's Phase 5 rule."
+    },
+    {
+      "claim": "No measurements were run or interpreted while writing the plan",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript tool inventory (4 Read of skill files, 2 Bash greps of skill files, 1 Write plan.md, 1 Write transcript.md, 1 Edit typo fix) shows no experiment/benchmark execution and no reading of metric data; plan.md footer states the same. Consistent with timing.json tool_uses=10."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md present in outputs. Transcript documents one self-caught defect: reading prereg.py revealed freeze refuses overwrites, correcting the plan's addendum-freezing instruction before writing it."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The plan does NOT recommend silently deleting finished blocks or patching conditions mid-run as the first action",
+        "reason": "The 'as the first action' qualifier makes this weakly discriminating: a plan could open with documentation and still contain a forbidden branch (e.g., 'diagnose blocks 1-3 vs block 4 on metric values, then decide what to drop'). The without_skill run passes this assertion while failing exactly that pattern. Consider a companion assertion: no branch of the plan may decide exclusions from inspecting metric values at all."
+      },
+      {
+        "reason": "No assertion checks that cited tooling actually exists. This run's CLI citations (decide --evidence, freeze --name refusal behavior, signtest --seed, holm) are all genuine — I verified them against prereg.py — but an answer that invents plausible-sounding commands (e.g., a nonexistent --unmark flag or a 'rollback' subcommand) would pass the current set. An assertion like 'any prereg.py command cited in the plan exists with the cited flags' would catch fabricated tooling."
+      },
+      {
+        "reason": "No assertion guards against fabricating scenario facts (e.g., asserting specific timestamps or block contents not provided in the prompt). This run handled it well with placeholders (<t1>-<t2>, <имя процесса>) and an instruction to recover timestamps from external logs; making that behavior explicit in an assertion would reward it and catch runs that invent concrete facts."
+      }
+    ],
+    "overall": "The assertion set targets the right discipline (registry-before-data, schedule-derived blast radius, raw intact, pre-fixed substitution rule) and expectation 5 is the most discriminating. The main gap is verification depth: citations and tooling are taken on faith."
+  }
+}
