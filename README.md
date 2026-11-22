@@ -52,21 +52,21 @@ For pure advisory questions (no measurements, no numbers used as evidence) the s
 | Append-only decisions registry, mechanical timestamps | ✅ `prereg.py decide` | ❌ | ❌ | ❌ |
 | Deterministic stats toolkit bundled | ✅ sign-flip, Holm, manifests | ❌ | ❌ | ❌ |
 | Survives agent session death | ✅ detached runs, resume-by-completeness | ❌ | ❌ | ❌ |
-| Honest-deviations reporting enforced | ✅ | ❌ | ❌ | ⚠️ |
+| Honest-deviations section mandated | ✅ | ❌ | ❌ | ⚠️ |
 | Target | **Your agent's own benchmarks** | — | — | Human-subject studies |
 
 Not an OSF skill. It doesn't write preregistration documents for registries — it gates the measurements your agent was about to take five minutes from now.
 
 ## Quickstart
 
-Works with any harness that reads SKILL.md skills (Claude Code, Codex, Cursor, OpenCode). One clone, one install:
+Tested with harnesses that read SKILL.md skills (Claude Code, Codex, Cursor, OpenCode). One clone, one install:
 
 ```bash
 git clone --depth 1 https://github.com/davvikq/prereg-lab
 python prereg-lab/prereg.py install    # stdlib only, Python 3.11+
 ```
 
-`install` copies the skill into **every** agent skills directory it finds: the canonical shared `~/.agents/skills` (always), plus existing harness dirs — `~/.claude/skills`, OpenCode locations, project-local `.agents` / `.claude` / `.opencode` — and prints exactly where it landed. One skill folder, all your agents.
+`install` copies the skill into the standard agent skills locations it detects: the canonical shared `~/.agents/skills` (always), plus existing harness dirs — `~/.claude/skills`, OpenCode locations, project-local `.agents` / `.claude` / `.opencode` — and prints exactly where it landed. One skill folder, all your agents.
 
 - Preview targets first: `--dry-run`
 - Exotic harness location: `--dir /path/to/skills` (repeatable)
@@ -87,40 +87,46 @@ Prefer an interactive player? `assets/demo.cast` is a standard asciinema v2 reco
 
 ## Example session
 
-Real output of `python demo.py` — the whole lifecycle on a toy experiment (builtin `sum()` vs a manual loop), in about one second, in a throwaway temp dir (paths shortened):
+Real output of `python demo.py` — the whole lifecycle on a toy experiment (builtin `sum()` vs a manual loop), in about one second, in a throwaway temp dir (paths shortened; the registry table is abridged):
 
 ```
 1. QUESTION - one sentence, metric named, cost estimated
    Does builtin sum() beat a manual for-loop on median full-pass time over
    identical integer lists? Metric: median pass seconds. Cost: ~24 runs, seconds.
+   registry opened before the pilot:
+   appended: | D-001 | 2026-11-22 12:55 UTC | Pilot plan: 3 calibration passes, builtin only; calibration only | ... |
 
 2. PILOT - calibration only: 'how do I run it', never 'does X work'
-   3 untimed calibration passes -> noise floor 21.5% of median pass
+   3 untimed calibration passes -> noise floor 10.3% of median pass
    (sets operational expectations; no hypothesis is tested here)
+   appended: | D-002 | 2026-11-22 12:55 UTC | Pilot noise floor 10.3%; operational calibration only | ... |
 
-3. REGISTRY - DECISIONS.md opened before anything else, rows at decision time
-   | D-001 | 2026-11-21 02:27 UTC | Demo design: builtin vs manual loop, paired repeats | ... |
-   | D-002 | 2026-11-21 02:27 UTC | Threshold 10%: below it, the switch is not worth a diff review | ... |
+3. REGISTRY - DECISIONS.md opened before the pilot; rows at decision time
+   appended: | D-003 | 2026-11-22 12:55 UTC | Demo design: builtin vs manual loop, paired repeats | ... |
+   appended: | D-004 | 2026-11-22 12:55 UTC | Threshold 10%: below it, the switch is not worth a diff review | ... |
+   (the demo then prints the full append-only table)
 
 4. PREREGISTER - hypotheses, thresholds, analysis plan -> frozen + sha256
    written; nothing confirmatory has been measured yet
-   sha256:   4013a167f64927ef...  (frozen copy: docs/PREREGISTRATION_frozen.md)
+   sha256:   adfa15e198077908...  (frozen copy: docs/PREREGISTRATION_frozen.md)
 
 5. RUN - 12 paired repeats, shuffled arm order, raw records only
    24 raw records -> raw_runs.jsonl (one record per run, not a summary)
    correctness gate: builtin sum == loop sum == reference on every pass: True
 
 6. ANALYZE - only the preregistered test, effect + p
-   median pass: builtin 0.52 ms vs loop 3.58 ms
-   relative reduction R = 85.4%   (frozen threshold: >= 10%)
+   median pass: builtin 0.48 ms vs loop 3.50 ms
+   relative reduction R = 86.3%   (frozen threshold: >= 10%)
    exact two-sided sign-flip p = 0.000488   (frozen alpha: 0.05)
 
 7. VERDICT - looked up from the frozen rule, not argued
    rule: ADOPT builtin if R >= 0.10 AND p < 0.05, else KEEP loop
-   fired: ADOPT builtin  (R = 85.4%, p = 0.000488)
+   fired: ADOPT builtin  (R = 86.3%, p = 0.000488)
 
-8. REPORT - manifest, deviations... and the guards refuse to rewrite history
-   manifest sha256: c1478a5d872421ae...
+8. REPORT - report, manifest, deviations... then the guards refuse to rewrite history
+   report written -> REPORT-demo.md
+   5 files -> .../docs/manifest.sha256
+   manifest sha256: aa01cd6bbc077ef0...
    Deviations: none found - demo, but the section would be here anyway.
    re-freeze exit 1:
      freeze: .../PREREGISTRATION_frozen.md already exists. Do NOT overwrite -
@@ -132,7 +138,7 @@ Real output of `python demo.py` — the whole lifecycle on a toy experiment (bui
 Immutable by default. That is the whole point.
 ```
 
-Run it yourself — `python demo.py` — your disk stays clean. Timings, and therefore R, vary by machine; the verdict logic does not.
+Run it yourself — `python demo.py` — your disk stays clean. Timings, and therefore R and the prereg/manifest hashes, vary by machine; the verdict logic does not.
 
 ## What's inside
 
@@ -146,6 +152,8 @@ Run it yourself — `python demo.py` — your disk stays clean. Timings, and the
 | `demo.py` | The lifecycle above in ~1 second, in a throwaway temp dir |
 | `evals/evals.json` | 3 test cases with pre-committed assertions |
 | `evidence/benchmark.json` | The evaluation described below, machine-readable |
+| `evidence/PROVENANCE.md` | Hashes, timeline, and what is repo-verifiable vs author-attested |
+| `evidence/grading/` | Per-run grading records for the 10 eval runs |
 
 `prereg.py` commands:
 
@@ -156,11 +164,11 @@ Run it yourself — `python demo.py` — your disk stays clean. Timings, and the
 | `decide REGISTRY "..." --evidence "..."` | append-only registry row with a mechanical UTC timestamp |
 | `signtest --diffs ...` | sign-flip randomization test (exact ≤ 17 diffs, Monte Carlo beyond) |
 | `holm p1 p2 ...` | Holm step-down adjusted p-values for a preregistered family |
-| `install` | copy the skill into every detected agent skills directory; `--dir`, `--update`, `--dry-run` |
+| `install` | copy the skill into detected agent skills locations; `--dir`, `--update`, `--dry-run` |
 
 ## The evidence
 
-The skill was evaluated with a preregistered protocol — frozen before any run and shipped in-repo: [evidence/PREREGISTRATION-iter2_frozen.md](evidence/PREREGISTRATION-iter2_frozen.md) (sha256 82dbb085…). 10 agent runs across 3 test cases, with-skill vs baseline, graded by independent graders against pre-committed assertions.
+The skill was evaluated with a preregistered protocol — frozen before any run and shipped in-repo: [evidence/PREREGISTRATION-iter2_frozen.md](evidence/PREREGISTRATION-iter2_frozen.md) (sha256 82dbb085…). 10 agent runs across 3 test cases, with-skill vs baseline, graded by separate grader sessions against pre-committed assertions.
 
 | Test case | with_skill | baseline | Paired diffs |
 |-----------|-----------|----------|--------------|
@@ -168,11 +176,13 @@ The skill was evaluated with a preregistered protocol — frozen before any run 
 | "Bless these two numbers" advisory | 1.00 | 1.00 | non-discriminating |
 | Mid-run confound response | 1.00 | 0.80 | new no-peek assertion caught the baseline |
 
-Full numbers: [evidence/benchmark.json](evidence/benchmark.json). Honest caveats, in the skill's own spirit: n = 3 per cell on the hands-on eval (one run per cell on the two advisory evals), so the paired sign-flip test was declared exploratory in advance (minimum two-sided p = 0.25 at n = 3) — this is consistent directional evidence, not statistical confirmation. In all three baseline runs the same four assertions failed — no preregistration, no freeze before confirmatory data, no rule-derived verdict, no registry — and run 1 additionally failed effect+variance.
+Two of the three with-skill hands-on runs missed the 10-minute wall-clock assertion (912.7s and 706.3s vs 700s) — every method assertion passed in all three. The measured runs themselves took seconds; the overhead is agent reasoning and artifact production, and it is included in the 0.905 above.
+
+Full numbers: [evidence/benchmark.json](evidence/benchmark.json); per-run grading: [evidence/grading/](evidence/grading/); hashes and attested limits: [evidence/PROVENANCE.md](evidence/PROVENANCE.md). Honest caveats, in the skill's own spirit: n = 3 per cell on the hands-on eval (one run per cell on the two advisory evals), so the paired sign-flip test was declared exploratory in advance (minimum two-sided p = 0.25 at n = 3) — this is consistent directional evidence, not statistical confirmation. In all three baseline runs the same four assertions failed — no preregistration, no freeze before confirmatory data, no rule-derived verdict, no registry — and run 1 additionally failed effect+variance.
 
 The moment that sold it: in one graded run, `str.find` beat regex by 26.7% — the preregistered "≥10%" threshold passed, but exact sign-flip gave **p = 0.0625 against a frozen 0.05**. The frozen rule fired *against* the intuition, and the agent complied: no test switching, no added repeats. Verdicts are looked up, not argued. That's the whole point.
 
-Cost, honestly stated: with-skill runs use ~4.8× more tokens on hands-on benchmarks. The skill reads its own files and produces artifacts. For advisory questions it stays out of the way — and the trigger description tells it to.
+Cost, honestly stated: with-skill runs use ~4.8× more tokens on hands-on benchmarks, and 2 of 3 exceeded the 10-minute wall-clock bound (the measurements themselves took seconds; the rest is reasoning and artifacts). For advisory questions it stays out of the way — and the trigger description tells it to.
 
 ## Data & Privacy
 
@@ -187,7 +197,7 @@ No. The discipline lives in process artifacts — frozen copies with hashes, app
 Yes. The skill raises the cost of self-deception; it doesn't handcuff anyone. In one graded run the agent still appended a registry row late — which broke the manifest hash and got caught. That's the design working: violations leave fingerprints.
 
 **Will it slow my agent down?**
-On hands-on benchmarks, yes — roughly 5× tokens, mostly reading the skill and producing artifacts. For advisory questions the trigger description keeps it out of the way, and a tiny bounded experiment earns a one-page preregistration — the discipline is the freeze order, not the page count.
+On hands-on benchmarks, yes — roughly 5× tokens, and in our runs 2/3 exceeded a 10-minute wall-clock bound. The measurements themselves took seconds; the rest is reading the skill and producing artifacts. For advisory questions the trigger description keeps it out of the way, and a tiny bounded experiment earns a one-page preregistration — the discipline is the freeze order, not the page count.
 
 **Does it work outside llama.cpp / ML benchmarks?**
 It's domain-neutral: prompts, configs, build times, search quality, anything measurable. Case studies in the skill happen to come from LLM inference work.
@@ -200,14 +210,15 @@ That's the cost of honesty, and the skill prices it explicitly: thresholds and s
 
 ## Tests
 
-The eval harness is the test. `evals/evals.json` holds 3 test cases with pre-committed assertions; the full pipeline (runs, grading, aggregation) follows the skill-creator loop, with grading artifacts kept per run. Smoke-check the toolkit:
+The eval definitions and per-run grading are the test evidence. `evals/evals.json` holds 3 test cases with pre-committed assertions; the full pipeline (runs, grading, aggregation) follows the skill-creator loop, with grading artifacts kept in `evidence/grading/`. Smoke-check the toolkit:
 
 ```bash
-python demo.py                                   # the full lifecycle, ~1 s
+python demo.py                                   # lifecycle + overwrite guards, ~1 s
 python prereg.py signtest --diffs 1 2 3          # exact, p = 0.25
 python prereg.py holm 0.003 0.014 0.052          # step-down adjusted
-python prereg.py freeze PREREGISTRATION.md --copy-to docs/   # refuses overwrites
 ```
+
+The freeze/manifest overwrite guards are exercised by `demo.py`.
 
 ## License
 

@@ -2,8 +2,6 @@
   "metadata": {
     "skill_name": "prereg-lab",
     "skill_path": "prereg-lab (v2)",
-    "executor_model": "<model-name>",
-    "analyzer_model": "<model-name>",
     "timestamp": "2026-11-21T01:33:07Z",
     "evals_run": [
       0,
@@ -15,7 +13,7 @@
       "eval-1": 1,
       "eval-2": 1
     },
-    "note": "Paths anonymized; grading artifacts (grading.json per run) available in the public eval writeup",
+    "note": "Paths anonymized. Per-run grading records are in evidence/grading/. tool_calls are timing.json tool-use counts (eval-0 values from grading execution_metrics); tokens are timing.json totals; run_summary covers all eval-* runs.",
     "preregistration_frozen": "evidence/PREREGISTRATION-iter2_frozen.md",
     "preregistration_sha256": "82dbb085e90cd65c773ca423f699e57b41e492e0f18dcaae711aaa02c3898d87"
   },
@@ -31,7 +29,7 @@
         "total": 7,
         "time_seconds": 912.7,
         "tokens": 2492183,
-        "tool_calls": 0,
+        "tool_calls": 44,
         "errors": 4
       },
       "expectations": [
@@ -85,7 +83,7 @@
         "total": 7,
         "time_seconds": 676.3,
         "tokens": 1528727,
-        "tool_calls": 0,
+        "tool_calls": 29,
         "errors": 1
       },
       "expectations": [
@@ -139,7 +137,7 @@
         "total": 7,
         "time_seconds": 706.3,
         "tokens": 2002652,
-        "tool_calls": 0,
+        "tool_calls": 31,
         "errors": 1
       },
       "expectations": [
@@ -290,7 +288,7 @@
         "total": 7,
         "time_seconds": 258.5,
         "tokens": 417316,
-        "tool_calls": 0,
+        "tool_calls": 13,
         "errors": 1
       },
       "expectations": [
@@ -347,7 +345,7 @@
         "total": 7,
         "time_seconds": 351.9,
         "tokens": 415635,
-        "tool_calls": 0,
+        "tool_calls": 12,
         "errors": 1
       },
       "expectations": [
@@ -404,7 +402,7 @@
         "total": 7,
         "time_seconds": 346.7,
         "tokens": 411001,
-        "tool_calls": 0,
+        "tool_calls": 12,
         "errors": 0
       },
       "expectations": [
@@ -546,6 +544,7 @@
     }
   ],
   "run_summary": {
+    "scope": "all eval-* runs; pass_rate is the mean of per-run assertion pass rates",
     "with_skill": {
       "pass_rate": {
         "mean": 0.9428,
@@ -599,7 +598,7 @@
     "Without_skill fails the same 4 assertions in all 3 runs: no preregistration, no freeze-before-confirmatory-data, no rule-derived verdict, no registry - the self-deception surface the skill targets; raw-records and mostly effect+variance pass on their own",
     "Eval-2 assertion 5 (no-peek before exclusion decisions) discriminated for the first time: without_skill 0.8 - its plan gates block exclusion on a post-hoc metric diagnosis, exactly the forbidden pattern; with_skill 1.0",
     "Eval-1 remains non-discriminating (1.0 vs 1.0) - grader notes the with_skill run's distinctive artifacts (draft prereg with 4-branch verdict rule, EXPLORATORY labeling) are real but unchecked by assertions",
-    "Cost from timing.json totals: eval-0 with_skill mean ~2.0M tokens vs ~415K baseline (~4.8x). tokens field in runs[] is output_chars (text), not API tokens - cross-config token deltas in run_summary use the output_chars basis",
+    "Cost from timing.json totals: eval-0 with_skill mean ~2.0M tokens vs ~415K baseline (~4.8x). tokens in runs[] are timing.json total tokens; output_chars is reported separately in evidence/grading/.",
     "Iteration-2 baselines were stronger than iteration-1 (kept raw CSVs, one run reported variance) - run-to-run model variance is real; n=3 is minimal, treat means as descriptive"
   ]
 }

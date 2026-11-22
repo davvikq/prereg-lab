@@ -1,7 +1,8 @@
 # PROVENANCE
 
 What a clone of this repository can verify on its own, and what is author-attested.
-Written 2026-11-21 in response to an external review; hashes are of the shipped files.
+Written 2026-11-21 in response to an external review; updated 2026-11-22 (see errata).
+Hashes are of the shipped files.
 
 ## Repo-verifiable artifacts
 
@@ -9,7 +10,7 @@ Written 2026-11-21 in response to an external review; hashes are of the shipped 
 |----------|------|--------|
 | Frozen eval protocol (frozen 2026-11-21 00:48 UTC, **before** every measurement) | [evidence/PREREGISTRATION-iter2_frozen.md](PREREGISTRATION-iter2_frozen.md) | `82dbb085e90cd65c773ca423f699e57b41e492e0f18dcaae711aaa02c3898d87` |
 | Eval definitions + pre-committed assertions | [evals/evals.json](../evals/evals.json) | `2089dc5dad96b7fb29938d7e019a46e24f6c344a0f3c374ab5bf694a90c3e1f5` |
-| Aggregated benchmark (10 runs, 3 test cases) | [evidence/benchmark.json](benchmark.json) | `ca67ebe8fccb60030fff0c5ecb36eb4a0a2e6a900250029cadbe413c2c2fb4c2` |
+| Aggregated benchmark (10 runs, 3 test cases) | [evidence/benchmark.json](benchmark.json) | `23b70a70eef583a7bb25c135337643c767f4cc6411a7ec36846e79e2b060013a` |
 | v1 skill snapshot (pre-review state, for diffing what the review changed) | [evidence/skill-snapshot-v1/](skill-snapshot-v1/) | SKILL.md `f337161effdcf51763576df0fb1eafe89095b07e104bb0458c3e4ecefaabff4e` |
 | Per-run grading records (10 runs, exact text/passed/evidence schema) | [evidence/grading/](grading/) | scanned: 0 local paths |
 
@@ -41,6 +42,13 @@ Original files live in the author's private workspace. Shipped copies:
   above). The frozen text is immutable, so this is disclosed here instead of edited.
 - `benchmark.json` `runs_per_configuration` was `3` in an earlier revision, which was true
   only for eval-0; corrected to a per-eval map {eval-0: 3, eval-1: 1, eval-2: 1}.
+- 2026-11-22: `benchmark.json` metadata corrected without changing any result. Model-name
+  placeholders were removed, `tool_calls` was backfilled from grading execution metrics
+  (eval-0 had shipped as 0), the token-source note was corrected, and `run_summary` was
+  labeled with its scope. The sha256 in the table above is the corrected file.
+- The frozen protocol §1 says graders read `agents/grader.md`; that instruction file was
+  not shipped. Per-assertion text, verdict, and evidence for every run are in
+  [evidence/grading/](grading/), so grading remains auditable without it.
 
 ## Known limits
 

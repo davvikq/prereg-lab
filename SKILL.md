@@ -264,7 +264,9 @@ These are part of prereg-lab and live in this directory:
   not revised even when its rationale turned out wrong, and the honest downgrading of a
   post-hoc freeze. Read once, before your first experiment, to understand why the rules
   exist.
-- **`prereg.py`** - Deterministic helpers, stdlib only: `freeze` (sha256 + frozen copy),
-  `manifest` (sha256 of all raw artifacts), `signtest` (Monte Carlo sign-flip p),
-  `holm` (step-down adjusted p-values). Run instead of improvising equivalents, so every
-  experiment hashes and tests the same way.
+- **`prereg.py`** - Deterministic helpers, stdlib only: `decide` (append-only registry row
+  with a mechanical UTC timestamp), `freeze` (sha256 + frozen copy), `manifest` (sha256 of
+  all raw artifacts), `signtest` (exact or Monte Carlo sign-flip p), `holm` (step-down
+  adjusted p-values), `install` (copy the skill, including LICENSE, into detected agent
+  skill directories). Run instead of improvising equivalents, so every experiment hashes
+  and tests the same way.

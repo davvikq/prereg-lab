@@ -2,11 +2,12 @@
 """prereg-lab demo: the full lifecycle in a couple of seconds, in a throwaway temp dir.
 
 Toy experiment: builtin sum() vs a manual loop over the same integers.
-Walks the whole prereg-lab pipeline - question -> pilot -> registry ->
-preregister (freeze) -> run -> analyze -> verdict lookup -> report - and then
-shows the guards refusing to overwrite the freeze and the manifest.
+Walks the whole prereg-lab pipeline - question -> registry (opened before the
+pilot) -> pilot -> preregister (freeze) -> run -> analyze -> verdict lookup ->
+report - and then shows the guards refusing to overwrite the freeze and the
+manifest.
 
-Deterministic measurements (seed 1337). Timestamps are the only real-time part.
+Deterministic inputs and arm order (seed 1337); timings are real-time and vary.
 Leaves nothing on your disk: everything happens in a temp dir that is removed
 at the end.
 
@@ -17,6 +18,7 @@ import json
 import os
 import random
 import shutil
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -43,11 +45,11 @@ H2: n/a (conditional experiments are out of scope for the demo).
 - 1 untimed warm-up pass; interpreter: the one running this demo
 - pilot noise floor (Phase 2 calibration): {noise_floor} of median pass
 
-## 4. Metrics
+## 2. Metrics
 Primary: median full-pass time, relative reduction R = (loop - builtin)/loop.
 Secondary: none.
 
-## 5. Analysis plan
+## 3. Analysis plan
 Exact two-sided sign-flip randomization test on paired differences, alpha 0.05.
 Verdict rule: ADOPT builtin if R >= 0.10 AND p < 0.05; otherwise KEEP loop.
 """
@@ -82,6 +84,13 @@ def main():
         print("Does builtin sum() beat a manual for-loop on median full-pass time over")
         print("identical integer lists? Metric: median pass seconds. Cost: ~24 runs, seconds.")
 
+        reg = os.path.join(work, "DECISIONS.md")
+        print("registry opened before the pilot:")
+        _, out = run_cli(["decide", reg,
+                          "Pilot plan: 3 calibration passes, builtin only; calibration only",
+                          "--evidence", "DECISIONS.md opened before the pilot starts"])
+        print(out.splitlines()[0])
+
         hr("2. PILOT - calibration only: 'how do I run it', never 'does X work'")
         xs = [rng.randrange(0, 1000) for _ in range(200_000)]
         pilot = [measure("builtin", xs)[0] for _ in range(3)]
@@ -89,15 +98,20 @@ def main():
         noise = (max(pilot) - min(pilot)) / med
         print(f"3 untimed calibration passes -> noise floor {noise:.1%} of median pass")
         print("(sets operational expectations; no hypothesis is tested here)")
+        _, out = run_cli(["decide", reg,
+                          f"Pilot noise floor {noise:.1%}; operational calibration only",
+                          "--evidence", f"3 calibration passes, spread {noise:.1%} of median pass"])
+        print(out.splitlines()[0])
 
-        hr("3. REGISTRY - DECISIONS.md opened before anything else, rows at decision time")
-        reg = os.path.join(work, "DECISIONS.md")
+        hr("3. REGISTRY - DECISIONS.md opened before the pilot; rows at decision time")
         for dec, ev in [("Demo design: builtin vs manual loop, paired repeats",
                          "same interpreter, same lists"),
                         ("Threshold 10%: below it, the switch is not worth a diff review",
                          "practical-significance argument, pre-data")]:
             _, out = run_cli(["decide", reg, dec, "--evidence", ev])
             print(out.splitlines()[0])
+        with open(reg, encoding="utf-8") as f:
+            print("\n" + f.read().rstrip())
 
         hr("4. PREREGISTER - hypotheses, thresholds, analysis plan -> frozen + sha256")
         prereg_path = os.path.join(work, "PREREGISTRATION.md")
@@ -127,8 +141,8 @@ def main():
         hr("6. ANALYZE - only the preregistered test, effect + p")
         diffs = [l - b for b, l in zip(builtin_t, loop_t)]
         p = sign_flip_p(diffs)[0]
-        b_med = sorted(builtin_t)[6]
-        l_med = sorted(loop_t)[6]
+        b_med = statistics.median(builtin_t)
+        l_med = statistics.median(loop_t)
         rel = (l_med - b_med) / l_med
         print(f"median pass: builtin {b_med*1000:.2f} ms vs loop {l_med*1000:.2f} ms")
         print(f"relative reduction R = {rel:.1%}   (frozen threshold: >= 10%)")
@@ -139,7 +153,21 @@ def main():
         print(f"rule: ADOPT builtin if R >= 0.10 AND p < 0.05, else KEEP loop")
         print(f"fired: {verdict}  (R = {rel:.1%}, p = {p:.6f})")
 
-        hr("8. REPORT - manifest, deviations... and the guards refuse to rewrite history")
+        hr("8. REPORT - report, manifest, deviations... then the guards refuse to rewrite history")
+        report_path = os.path.join(work, "REPORT-demo.md")
+        with open(report_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(
+                "# REPORT - demo\n\n"
+                "## 1. Verdict\n"
+                f"{verdict}. Frozen rule: ADOPT builtin if R >= 0.10 AND p < 0.05, "
+                f"else KEEP loop. Observed: R = {rel:.1%}, p = {p:.6f}.\n\n"
+                "## 2. Preregistered contrast\n"
+                f"median pass: builtin {b_med*1000:.2f} ms vs loop {l_med*1000:.2f} ms; "
+                f"R = {rel:.1%}; exact two-sided sign-flip p = {p:.6f}.\n\n"
+                "## 3. Deviations\n"
+                "None found - demo run, checked against the frozen conditions.\n"
+            )
+        print("report written -> REPORT-demo.md")
         code, out = run_cli(["manifest", work, "-o", os.path.join(work, "docs", "manifest.sha256")])
         print(out)
         print("Deviations: none found - demo, but the section would be here anyway.")

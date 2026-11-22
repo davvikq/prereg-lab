@@ -61,7 +61,7 @@ Verdict rule: <outcome -> verdict mapping, exact>.
 
 Appended addenda only, each "changed after start <date>, reason: <...>".
 
-## 10. Cost estimate
+## 7. Cost estimate
 
 <blocks x repeats x minutes; disk; what gets computed where>
 ```
@@ -105,10 +105,10 @@ Original text above is unchanged.
 ## 4. Post-hoc (labeled POST-HOC; decides nothing)
 <separate subsections and files for each post-hoc probe>
 
-## 10. Deviations
+## 5. Deviations
 <mandatory even when empty: "none found - checked against <list>">
 
-## 11. Artifacts
+## 6. Artifacts
 <paths to raw files; manifest path; manifest sha256>
 ```
 

@@ -35,6 +35,7 @@ Examples:
 import argparse
 import hashlib
 import itertools
+import math
 import os
 import random
 import re
@@ -54,34 +55,42 @@ def sha256_file(path):
 def cmd_decide(args):
     path = args.registry
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    header = (
+        "# DECISIONS\n\n"
+        "Append-only registry. One row per decision, written at decision time\n"
+        "(use prereg.py decide so the timestamp is mechanical). Never rewrite;\n"
+        "a reversed decision gets status SUPERSEDED with a pointer.\n\n"
+        "| ID | Date | Decision | Evidence |\n"
+        "|----|------|----------|----------|\n"
+    )
     if os.path.exists(path):
         with open(path, encoding="utf-8") as f:
             content = f.read()
         numbers = [int(x) for x in re.findall(r"\bD-(\d+)\b", content)]
         n = (max(numbers) + 1) if numbers else 1
-        if not content.endswith("\n"):
-            content += "\n"
     else:
+        content = ""
         n = 1
-        content = (
-            "# DECISIONS\n\n"
-            "Append-only registry. One row per decision, written at decision time\n"
-            "(use prereg.py decide so the timestamp is mechanical). Never rewrite;\n"
-            "a reversed decision gets status SUPERSEDED with a pointer.\n\n"
-            "| ID | Date | Decision | Evidence |\n"
-            "|----|------|----------|----------|\n"
-        )
     def cell(text):
         return text.replace("|", "\\|")  # keep the markdown table intact
 
     row = f"| D-{n:03d} | {stamp} | {cell(args.decision)} | {cell(args.evidence)} |\n"
     with open(path, "a", encoding="utf-8", newline="") as f:
+        if not content.strip():
+            if content:
+                f.write("\n")
+            f.write(header)
+        elif not content.endswith("\n"):
+            f.write("\n")
         f.write(row)
     print(f"appended: {row.strip()}")
     print(f"registry sha256: {sha256_file(path)}")
 
 
-SKILL_FILES = ("SKILL.md", "templates.md", "statistics.md", "case-studies.md", "prereg.py")
+SKILL_FILES = (
+    "SKILL.md", "templates.md", "statistics.md", "case-studies.md",
+    "prereg.py", "LICENSE",
+)
 
 
 def cmd_install(args):
@@ -256,8 +265,8 @@ def cmd_holm(args):
     ps = args.pvalues
     if not ps:
         sys.exit("holm: no p-values given")
-    if any(p < 0 or p > 1 for p in ps):
-        sys.exit("holm: p-values must be in [0, 1]")
+    if any(not math.isfinite(p) or p < 0 or p > 1 for p in ps):
+        sys.exit("holm: p-values must be finite and in [0, 1]")
     m = len(ps)
     order = sorted(range(m), key=lambda i: ps[i])
     adjusted = [0.0] * m
