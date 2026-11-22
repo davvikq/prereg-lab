@@ -181,29 +181,25 @@ The moment that sold it: in one graded run, `str.find` beat regex by 26.7% — t
 
 Cost, honestly stated: with-skill runs use ~4.8× more tokens on hands-on benchmarks, and 2 of 3 exceeded the 10-minute wall-clock bound (the measurements themselves took seconds; the rest is reasoning and artifacts). For advisory questions it stays out of the way — and the trigger description tells it to.
 
-## Data & Privacy
-
-`prereg.py` is local-only: it hashes files and runs math, with no telemetry, network calls, or accounts. The skill itself adds no data collection — but it runs inside whatever agent harness you use. A cloud-hosted agent already sends your prompts and files to its provider under that provider's terms; prereg-lab does not change that. Run a local agent if the measurements themselves must stay on your machine.
-
 ## FAQ
 
 **Is this just a prompt telling the agent to be careful?**
-No. The discipline lives in process artifacts — frozen copies with hashes, append-only registries with mechanical timestamps, immutable manifests — and `prereg.py` refuses the operations that would quietly break them.
+No. The discipline lives in artifacts — frozen copies with hashes, append-only registries with mechanical timestamps, immutable manifests — and `prereg.py` refuses the operations that would quietly break them.
 
 **Can the agent still cheat?**
-Yes. The skill raises the cost of self-deception; it doesn't handcuff anyone. In one graded run the agent still appended a registry row late — which broke the manifest hash and got caught. That's the design working: violations leave fingerprints.
+Yes. The skill raises the cost of self-deception; it doesn't handcuff anyone. Violations leave fingerprints — in one graded run a late registry row broke the manifest hash and was caught.
 
 **Will it slow my agent down?**
-On hands-on benchmarks, yes — roughly 5× tokens, and in our runs 2/3 exceeded a 10-minute wall-clock bound. The measurements themselves took seconds; the rest is reading the skill and producing artifacts. For advisory questions the trigger description keeps it out of the way, and a tiny bounded experiment earns a one-page preregistration — the discipline is the freeze order, not the page count.
+On hands-on benchmarks, yes — roughly 5× tokens, and 2/3 of our runs exceeded a 10-minute wall-clock bound (the measurements took seconds; the rest is reasoning and artifacts). For advisory questions it stays out of the way.
+
+**Does it phone home?**
+No. `prereg.py` makes no network calls and collects no telemetry — it only reads and writes local files.
 
 **Does it work outside llama.cpp / ML benchmarks?**
-It's domain-neutral: prompts, configs, build times, search quality, anything measurable. Case studies in the skill happen to come from LLM inference work.
+Yes — prompts, configs, build times, search quality, anything measurable. The case studies come from LLM inference work, but the rules are domain-neutral.
 
 **Can I use the statistics without the skill?**
-Yes. `prereg.py` and `statistics.md` are standalone — the sign-flip test and Holm correction are the right default for small paired agent experiments regardless.
-
-**What about false negatives — strict thresholds rejecting real effects?**
-That's the cost of honesty, and the skill prices it explicitly: thresholds and stopping rules are chosen before the data exists, and a failed gate is a reported result, not a hidden embarrassment. Want a second look? Run a new preregistered experiment — never revise the verdict.
+Yes. `prereg.py` and `statistics.md` are standalone — sign-flip and Holm are the right default for small paired experiments. Strict thresholds are the deliberate cost: a failed gate is a reported result, not a reason to revise the verdict.
 
 ## Tests
 
