@@ -44,18 +44,15 @@ For pure advisory questions (no measurements, no numbers used as evidence) the s
 
 ## How prereg-lab compares
 
-| | prereg-lab | "Be careful" prompting | Eyeball & rerun | Academic prereg skills (OSF/AsPredicted) |
-|---|---|---|---|---|
-| Freezes hypotheses + thresholds **before** first measurement | ✅ sha256-frozen copy | ❌ | ❌ | ✅ for human studies |
-| Forbids interpreting partial data | ✅ Iron Law | ❌ | ❌ | ⚠️ process, not enforcement |
-| Verdict looked up from frozen rule | ✅ | ❌ | ❌ | ⚠️ |
-| Append-only decisions registry, mechanical timestamps | ✅ `prereg.py decide` | ❌ | ❌ | ❌ |
-| Deterministic stats toolkit bundled | ✅ sign-flip, Holm, manifests | ❌ | ❌ | ❌ |
-| Survives agent session death | ✅ detached runs, resume-by-completeness | ❌ | ❌ | ❌ |
-| Honest-deviations section mandated | ✅ | ❌ | ❌ | ⚠️ |
-| Target | **Your agent's own benchmarks** | — | — | Human-subject studies |
-
-Not an OSF skill. It doesn't write preregistration documents for registries — it gates the measurements your agent was about to take five minutes from now.
+| | prereg-lab | "Be careful" prompting | Eyeball & rerun |
+|---|---|---|---|
+| Freezes hypotheses + thresholds **before** first measurement | ✅ sha256-frozen copy | ❌ | ❌ |
+| Forbids interpreting partial data | ✅ Iron Law | ❌ | ❌ |
+| Verdict looked up from frozen rule | ✅ | ❌ | ❌ |
+| Append-only decisions registry, mechanical timestamps | ✅ `prereg.py decide` | ❌ | ❌ |
+| Deterministic stats toolkit bundled | ✅ sign-flip, Holm, manifests | ❌ | ❌ |
+| Survives agent session death | ✅ detached runs, resume-by-completeness | ❌ | ❌ |
+| Honest-deviations section mandated | ✅ | ❌ | ❌ |
 
 ## Quickstart
 
