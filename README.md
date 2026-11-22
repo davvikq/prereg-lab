@@ -186,7 +186,7 @@ Cost, honestly stated: with-skill runs use ~4.8× more tokens on hands-on benchm
 
 ## Data & Privacy
 
-100% local. No telemetry, no network calls, no accounts. `prereg.py` hashes files and runs math — nothing leaves your machine.
+`prereg.py` is local-only: it hashes files and runs math, with no telemetry, network calls, or accounts. The skill itself adds no data collection — but it runs inside whatever agent harness you use. A cloud-hosted agent already sends your prompts and files to its provider under that provider's terms; prereg-lab does not change that. Run a local agent if the measurements themselves must stay on your machine.
 
 ## FAQ
 
